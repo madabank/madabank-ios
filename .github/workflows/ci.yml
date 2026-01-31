@@ -31,47 +31,32 @@ jobs:
         with:
           xcode-version: latest-stable
           
-      - name: Install Tuist
-        run: |
-          curl -Ls https://install.tuist.io | bash
-          echo "$HOME/.tuist/bin" >> $GITHUB_PATH
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+          working-directory: Madabank
           
       - name: Install dependencies
         working-directory: Madabank
-        run: tuist install
+        run: |
+          tuist install
+          bundle install
         
       - name: Generate project
         working-directory: Madabank
         run: tuist generate
         
-      - name: Install SwiftLint
-        if: ${{ inputs.run_lint }}
-        run: brew install swiftlint
-        
-      - name: Run SwiftLint
-        if: ${{ inputs.run_lint }}
+      - name: Run Fastlane CI
         working-directory: Madabank
-        run: swiftlint --strict
-        continue-on-error: true
-        
-      - name: Build
-        working-directory: Madabank
-        run: |
-          xcodebuild build \
-            -workspace Madabank.xcworkspace \
-            -scheme Madabank \
-            -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
-            -configuration Debug \
-            CODE_SIGNING_ALLOWED=NO
-            
-      - name: Run tests
-        if: ${{ inputs.run_tests }}
-        working-directory: Madabank
-        run: |
-          xcodebuild test \
-            -workspace Madabank.xcworkspace \
-            -scheme Madabank \
-            -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
-            -configuration Debug \
-            CODE_SIGNING_ALLOWED=NO
-        continue-on-error: true
+        env:
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
+          FASTLANE_PASSWORD: ${{ secrets.FASTLANE_PASSWORD }}
+          APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
+          APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
+        run: bundle exec fastlane ci
+
