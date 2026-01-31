@@ -1,37 +1,20 @@
 import ProjectDescription
+import ProjectDescriptionHelpers
 
-let project = Project(
+// Main Madabank App Project
+let project = Project.app(
     name: "Madabank",
-    targets: [
-        .target(
-            name: "Madabank",
-            destinations: .iOS,
-            product: .app,
-            bundleId: "dev.tuist.Madabank",
-            infoPlist: .extendingDefault(
-                with: [
-                    "UILaunchScreen": [
-                        "UIColorName": "",
-                        "UIImageName": "",
-                    ],
-                ]
-            ),
-            buildableFolders: [
-                "Madabank/Sources",
-                "Madabank/Resources",
-            ],
-            dependencies: []
-        ),
-        .target(
-            name: "MadabankTests",
-            destinations: .iOS,
-            product: .unitTests,
-            bundleId: "dev.tuist.MadabankTests",
-            infoPlist: .default,
-            buildableFolders: [
-                "Madabank/Tests"
-            ],
-            dependencies: [.target(name: "Madabank")]
-        ),
+    dependencies: [
+        // Feature modules
+        .module(.auth),
+        .module(.home),
+        .module(.accounts),
+        .module(.cards),
+        .module(.transactions),
+        .module(.profile),
+        
+        // External dependencies for the main app
+        .external(name: "RxSwift"),
+        .external(name: "RxCocoa")
     ]
 )

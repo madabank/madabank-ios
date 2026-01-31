@@ -5,18 +5,21 @@ import PackageDescription
     import struct ProjectDescription.PackageSettings
 
     let packageSettings = PackageSettings(
-        // Customize the product types for specific package product
-        // Default is .staticFramework
-        // productTypes: ["Alamofire": .framework,]
-        productTypes: [:]
+        productTypes: [
+            "Alamofire": .framework,
+            "RxSwift": .framework,
+            "RxCocoa": .framework,
+            "RxRelay": .framework,
+            "SnapKit": .framework
+        ]
     )
 #endif
 
 let package = Package(
     name: "Madabank",
     dependencies: [
-        .package(url: "https://github.com/Alamofire/Alamofire", from: .branch("master")),
-        .package(url: "https://github.com/ReactiveX/RxSwift", from: .branch("main")),
-        .package(url: "https://github.com/SnapKit/SnapKit", from: .branch("develop"))
+        .package(url: "https://github.com/Alamofire/Alamofire", from: "5.9.0"),
+        .package(url: "https://github.com/ReactiveX/RxSwift", from: "6.7.0"),
+        .package(url: "https://github.com/SnapKit/SnapKit", from: "5.7.0")
     ]
 )
