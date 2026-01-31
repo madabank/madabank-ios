@@ -58,13 +58,40 @@ DerivedData/
 !*.xcworkspace/contents.xcworkspacedata
 /*.gcno
 
-### Projects ###
+### Tuist ###
+# Generated Xcode projects and workspaces
 *.xcodeproj
 *.xcworkspace
 
-### Tuist derived files ###
-graph.dot
+# Tuist generated files
 Derived/
+graph.dot
+graph.png
+graph.json
 
-### Tuist managed dependencies ###
+# Tuist cache and build directories
 Tuist/.build
+.tuist-bin/
+.tuist-version
+
+### Swift Package Manager ###
+.swiftpm/
+.build/
+Package.resolved
+
+### Environment ###
+.env
+.env.local
+.env.*.local
+
+### IDE ###
+.idea/
+*.swp
+*.swo
+*~
+
+### Fastlane ###
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output/
