@@ -6,6 +6,8 @@ default_platform(:ios)
 platform :ios do
   # ==================== SETUP ====================
   
+  # ==================== SETUP ====================
+  
   before_all do
     setup_ci if ENV['CI']
   end
@@ -20,7 +22,8 @@ platform :ios do
       devices: ["iPhone 16 Pro"],
       clean: true,
       result_bundle: true,
-      code_coverage: true
+      code_coverage: true,
+      output_directory: "./fastlane/test_output"
     )
   end
 
@@ -34,10 +37,22 @@ platform :ios do
     )
   end
 
+  # ==================== CERTIFICATES ====================
+
+  desc "Sync certificates and profiles (Read-only for CI)"
+  lane :sync_certs do
+    # Ensure you have set up Match repo and environment variables
+    # MATCH_PASSWORD, MATCH_GIT_URL, git_private_key (SSH)
+    match(type: "appstore", readonly: is_ci)
+    match(type: "development", readonly: is_ci)
+  end
+
   # ==================== BUILD ====================
   
   desc "Build the app for testing"
   lane :build do
+    sync_certs if is_ci
+    
     gym(
       workspace: "Madabank.xcworkspace",
       scheme: "Madabank",
@@ -50,13 +65,16 @@ platform :ios do
 
   desc "Build for release"
   lane :build_release do
+    sync_certs if is_ci
+    
     gym(
       workspace: "Madabank.xcworkspace",
       scheme: "Madabank",
       configuration: "Release",
       export_method: "app-store",
       output_directory: "./build",
-      output_name: "Madabank.ipa"
+      output_name: "Madabank.ipa",
+      clean: true
     )
   end
 
@@ -71,17 +89,25 @@ platform :ios do
 
   desc "Deploy to TestFlight"
   lane :beta do
-    ensure_git_status_clean
+    ensure_git_status_clean unless is_ci
     
-    increment_build_number(
-      build_number: latest_testflight_build_number + 1
-    )
+    # Increment build number
+    current_build_number = latest_testflight_build_number(initial_build_number: 1)
+    increment_build_number(build_number: current_build_number + 1)
     
     build_release
     
     upload_to_testflight(
-      skip_waiting_for_build_processing: true
+      skip_waiting_for_build_processing: true,
+      changelog: "Updated via Fastlane"
     )
+    
+    # Commit build number bump
+    if is_ci
+      # Configure git user for CI
+      sh("git config user.email 'daris.adam@madabank.art'")
+      sh("git config user.name 'Madabank Bot'")
+    end
     
     commit_version_bump(
       message: "chore: Bump build number [skip ci]",
