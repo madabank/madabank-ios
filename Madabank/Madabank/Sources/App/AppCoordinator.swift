@@ -1,71 +1,51 @@
 import UIKit
-import SnapKit
+import Auth
+import Home
 
-/// Protocol defining coordinator behavior
-public protocol Coordinator: AnyObject {
-    var childCoordinators: [Coordinator] { get set }
-    func start()
-}
-
-/// Root coordinator for the Madabank app
-final class AppCoordinator: Coordinator {
+class AppCoordinator: AuthCoordinatorDelegate {
     
-    let window: UIWindow
-    var childCoordinators: [Coordinator] = []
-    
-    // MARK: - Dependencies
-    
-    private lazy var diContainer = AppDIContainer()
-    
-    // MARK: - Init
+    var window: UIWindow
+    var navigationController: UINavigationController
     
     init(window: UIWindow) {
         self.window = window
+        self.navigationController = UINavigationController()
+        window.rootViewController = navigationController
+        window.makeKeyAndVisible()
     }
-    
-    // MARK: - Start
     
     func start() {
-        showSplash()
-    }
-    
-    // MARK: - Navigation
-    
-    private func showSplash() {
-        let splashVC = SplashViewController()
-        splashVC.onSplashComplete = { [weak self] in
-            self?.showMainApp()
-        }
-        
-        window.rootViewController = splashVC
-        window.makeKeyAndVisible()
-        
-        UIView.transition(
-            with: window,
-            duration: 0.3,
-            options: .transitionCrossDissolve,
-            animations: nil
-        )
-    }
-    
-    private func showMainApp() {
-        // TODO: Check if user is authenticated
-        // For now, go directly to main tab bar
-        let tabBarController = MainTabBarController()
-        
-        UIView.transition(
-            with: window,
-            duration: 0.4,
-            options: .transitionCrossDissolve
-        ) {
-            self.window.rootViewController = tabBarController
-        }
+        // Check if logged in (could check Token storage)
+        // For now, assume Not Logged In -> Show Auth
+        showAuth()
     }
     
     private func showAuth() {
-        // TODO: Initialize AuthCoordinator from Auth module
-        // let authCoordinator = AuthCoordinator(...)
-        // childCoordinators.append(authCoordinator)
-        // authCoordinator.start()
+        let authCoord = AuthCoordinator(
+            navigationController: navigationController,
+            factory: AppDIContainer.shared
+        )
+        authCoord.delegate = self
+        authCoord.start()
+    }
+    
+    private func showMain() {
+        // Switch to Tab Bar or just Home for now
+        let homeNav = UINavigationController()
+        let homeCoord = HomeCoordinator(
+            navigationController: homeNav,
+            factory: AppDIContainer.shared
+        )
+        homeCoord.start()
+        
+        // Replacing root
+        window.rootViewController = homeNav
+        // Or if using TabBar, setup TabBarController here
+    }
+    
+    // MARK: - AuthDelegate
+    func authCoordinatorDidFinish(_ coordinator: AuthCoordinator) {
+        // User logged in
+        showMain()
     }
 }
