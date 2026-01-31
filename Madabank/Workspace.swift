@@ -9,7 +9,7 @@ let workspace = Workspace(
         
         // Shared modules
         "Modules/Shared/Core",
-        "Modules/Shared/Network",
+        "Modules/Shared/Networking",
         "Modules/Shared/Domain",
         "Modules/Shared/Data",
         "Modules/Shared/CommonUI",
