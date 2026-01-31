@@ -3,7 +3,7 @@
 	url = https://github.com/madabank/madabank-core.git
 [submodule "Madabank/Modules/Shared/Networking"]
 	path = Madabank/Modules/Shared/Networking
-	url = https://github.com/madabank/madabank-network.git
+	url = https://github.com/madabank/madabank-networking.git
 [submodule "Madabank/Modules/Shared/Domain"]
 	path = Madabank/Modules/Shared/Domain
 	url = https://github.com/madabank/madabank-domain.git
