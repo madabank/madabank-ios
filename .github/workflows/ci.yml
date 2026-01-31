@@ -1,0 +1,77 @@
+name: iOS CI
+
+# Manual trigger only - run by clicking "Run workflow" button on GitHub Actions page
+on:
+  workflow_dispatch:
+    inputs:
+      run_tests:
+        description: 'Run unit tests'
+        required: false
+        default: 'true'
+        type: boolean
+      run_lint:
+        description: 'Run SwiftLint'
+        required: false
+        default: 'true'
+        type: boolean
+
+jobs:
+  build:
+    name: Build & Test
+    runs-on: macos-14
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+          
+      - name: Install Tuist
+        run: |
+          curl -Ls https://install.tuist.io | bash
+          echo "$HOME/.tuist/bin" >> $GITHUB_PATH
+          
+      - name: Install dependencies
+        working-directory: Madabank
+        run: tuist install
+        
+      - name: Generate project
+        working-directory: Madabank
+        run: tuist generate
+        
+      - name: Install SwiftLint
+        if: ${{ inputs.run_lint }}
+        run: brew install swiftlint
+        
+      - name: Run SwiftLint
+        if: ${{ inputs.run_lint }}
+        working-directory: Madabank
+        run: swiftlint --strict
+        continue-on-error: true
+        
+      - name: Build
+        working-directory: Madabank
+        run: |
+          xcodebuild build \
+            -workspace Madabank.xcworkspace \
+            -scheme Madabank \
+            -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+            -configuration Debug \
+            CODE_SIGNING_ALLOWED=NO
+            
+      - name: Run tests
+        if: ${{ inputs.run_tests }}
+        working-directory: Madabank
+        run: |
+          xcodebuild test \
+            -workspace Madabank.xcworkspace \
+            -scheme Madabank \
+            -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+            -configuration Debug \
+            CODE_SIGNING_ALLOWED=NO
+        continue-on-error: true
