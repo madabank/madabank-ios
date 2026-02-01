@@ -34,6 +34,8 @@ final class AppDIContainer: AuthFactory, HomeFactory, AccountsFactory, CardsFact
     
     // Dashboard Use Cases
     func makeGetUserProfileUseCase() -> GetUserProfileUseCaseProtocol { return GetUserProfileUseCase(userRepository: userRepository) }
+    func makeCreateAccountUseCase() -> CreateAccountUseCaseProtocol { return CreateAccountUseCase(repository: accountRepository) }
+    func makeGetAccountDetailsUseCase() -> GetAccountDetailsUseCaseProtocol { return GetAccountDetailsUseCase(repository: accountRepository) }
     func makeGetAccountBalanceUseCase() -> GetAccountBalanceUseCaseProtocol { return GetAccountBalanceUseCase(accountRepository: accountRepository) }
     func makeGetRecentTransactionsUseCase() -> GetRecentTransactionsUseCaseProtocol { 
         return GetRecentTransactionsUseCase(
@@ -71,8 +73,22 @@ final class AppDIContainer: AuthFactory, HomeFactory, AccountsFactory, CardsFact
     }
     
     // MARK: - AccountsFactory
-    func makeAccountsViewController() -> UIViewController {
-        return AccountsViewController(viewModel: AccountsViewModel(getAccountsUseCase: makeGetAccountsUseCase()))
+    func makeAccountsViewController(actions: AccountsViewModelActions) -> UIViewController {
+        return AccountsViewController(viewModel: AccountsViewModel(getAccountsUseCase: makeGetAccountsUseCase(), actions: actions))
+    }
+    
+    func makeAccountDetailViewController(accountId: String) -> UIViewController {
+        let vm = AccountDetailViewModel(
+            accountId: accountId,
+            getAccountDetailsUseCase: makeGetAccountDetailsUseCase(),
+            getRecentTransactionsUseCase: makeGetRecentTransactionsUseCase()
+        )
+        return AccountDetailViewController(viewModel: vm)
+    }
+    
+    func makeCreateAccountViewController(actions: CreateAccountViewModelActions) -> UIViewController {
+        let vm = CreateAccountViewModel(createAccountUseCase: makeCreateAccountUseCase(), actions: actions)
+        return CreateAccountViewController(viewModel: vm)
     }
     
     // MARK: - TransactionsFactory
