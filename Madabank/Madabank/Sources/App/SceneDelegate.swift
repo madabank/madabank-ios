@@ -18,6 +18,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Initialize the app coordinator with window
         appCoordinator = AppCoordinator(window: window)
         
+        // Ensure window is visible
+        window.makeKeyAndVisible()
+        
         // Start the app flow
         appCoordinator?.start()
     }
