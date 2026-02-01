@@ -3,10 +3,12 @@ import Core
 import Auth
 import Home
 
-class AppCoordinator: AuthCoordinatorDelegate {
+class AppCoordinator: AuthCoordinatorDelegate, HomeCoordinatorDelegate {
     
     var window: UIWindow
     var navigationController: UINavigationController
+    
+    private var homeCoordinator: HomeCoordinator?
     
     init(window: UIWindow) {
         self.window = window
@@ -34,22 +36,34 @@ class AppCoordinator: AuthCoordinatorDelegate {
     }
     
     private func showMain() {
-        // Switch to Tab Bar or just Home for now
         let homeNav = UINavigationController()
         let homeCoord = HomeCoordinator(
             navigationController: homeNav,
             factory: AppDIContainer.shared
         )
+        homeCoord.delegate = self
         homeCoord.start()
         
-        // Replacing root
+        self.homeCoordinator = homeCoord
         window.rootViewController = homeNav
-        // Or if using TabBar, setup TabBarController here
     }
     
     // MARK: - AuthDelegate
     func authCoordinatorDidFinish(_ coordinator: AuthCoordinator) {
         // User logged in
         showMain()
+    }
+    
+    // MARK: - HomeDelegate
+    func homeCoordinatorDidRequestAccounts(_ coordinator: HomeCoordinator) {
+        print("Requested Accounts/Transactions")
+    }
+    
+    func homeCoordinatorDidRequestCards(_ coordinator: HomeCoordinator) {
+        print("Requested Cards")
+    }
+    
+    func homeCoordinatorDidRequestTransfer(_ coordinator: HomeCoordinator) {
+        print("Requested Transfer")
     }
 }

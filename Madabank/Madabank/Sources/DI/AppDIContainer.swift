@@ -31,7 +31,16 @@ final class AppDIContainer: AuthFactory, HomeFactory, AccountsFactory, CardsFact
     func makeGetAccountsUseCase() -> GetAccountsUseCaseProtocol { return GetAccountsUseCase(repository: accountRepository) }
     func makeGetProfileUseCase() -> GetProfileUseCaseProtocol { return GetProfileUseCase(repository: userRepository) }
     func makeTransferMoneyUseCase() -> TransferMoneyUseCaseProtocol { return TransferMoneyUseCase(repository: transactionRepository) }
-    // func makeGetCardsUseCase()...
+    
+    // Dashboard Use Cases
+    func makeGetUserProfileUseCase() -> GetUserProfileUseCaseProtocol { return GetUserProfileUseCase(userRepository: userRepository) }
+    func makeGetAccountBalanceUseCase() -> GetAccountBalanceUseCaseProtocol { return GetAccountBalanceUseCase(accountRepository: accountRepository) }
+    func makeGetRecentTransactionsUseCase() -> GetRecentTransactionsUseCaseProtocol { 
+        return GetRecentTransactionsUseCase(
+            transactionRepository: transactionRepository,
+            accountRepository: accountRepository
+        ) 
+    }
     
     // MARK: - AuthFactory
     func makeLoginViewController(actions: LoginViewModelActions) -> UIViewController {
@@ -51,8 +60,13 @@ final class AppDIContainer: AuthFactory, HomeFactory, AccountsFactory, CardsFact
     }
     
     // MARK: - HomeFactory
-    func makeHomeViewController() -> UIViewController {
-        let vm = HomeViewModel(userRepository: userRepository, getAccountsUseCase: makeGetAccountsUseCase())
+    func makeHomeViewController(actions: HomeViewModelActions) -> UIViewController {
+        let vm = HomeViewModel(
+            getUserProfileUseCase: makeGetUserProfileUseCase(),
+            getAccountBalanceUseCase: makeGetAccountBalanceUseCase(),
+            getRecentTransactionsUseCase: makeGetRecentTransactionsUseCase(),
+            actions: actions
+        )
         return HomeViewController(viewModel: vm)
     }
     
