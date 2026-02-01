@@ -85,13 +85,13 @@ fi
 # 3. Tuist Setup
 cd Madabank
 
-echo -e "${BLUE}📦 Installing Tuist dependencies...${NC}"
-tuist install
-
 if [ "$CLEAN" = true ]; then
     echo -e "${BLUE}🧹 Cleaning Tuist cache (as requested)...${NC}"
     tuist clean
 fi
+
+echo -e "${BLUE}📦 Installing Tuist dependencies...${NC}"
+tuist install
 
 echo -e "${BLUE}🛠  Generating project...${NC}"
 tuist generate
