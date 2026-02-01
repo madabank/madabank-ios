@@ -47,6 +47,10 @@ final class AppDIContainer: AuthFactory, HomeFactory, AccountsFactory, CardsFact
     func makeGetCardsUseCase() -> GetCardsUseCaseProtocol { return GetCardsUseCase(repository: cardRepository) }
     func makeManageCardUseCase() -> ManageCardUseCaseProtocol { return ManageCardUseCase(repository: cardRepository) }
     
+    // Transactions Use Cases
+    func makeGetTransactionsUseCase() -> GetTransactionsUseCaseProtocol { return GetTransactionsUseCase(repository: transactionRepository) }
+    func makeGetTransactionDetailsUseCase() -> GetTransactionDetailsUseCaseProtocol { return GetTransactionDetailsUseCase(repository: transactionRepository) }
+    
     // MARK: - AuthFactory
     func makeLoginViewController(actions: LoginViewModelActions) -> UIViewController {
         let vm = LoginViewModel(loginUseCase: makeLoginUseCase(), actions: actions)
@@ -95,8 +99,16 @@ final class AppDIContainer: AuthFactory, HomeFactory, AccountsFactory, CardsFact
     }
     
     // MARK: - TransactionsFactory
-    func makeTransactionsViewController() -> UIViewController {
-        return TransactionsViewController(viewModel: TransactionsViewModel(transferMoneyUseCase: makeTransferMoneyUseCase()))
+    func makeTransactionsViewController(actions: TransactionsViewModelActions) -> UIViewController {
+        return TransactionsViewController(viewModel: TransactionsViewModel(
+            getTransactionsUseCase: makeGetTransactionsUseCase(),
+            getAccountsUseCase: makeGetAccountsUseCase(),
+            actions: actions
+        ))
+    }
+    
+    func makeTransactionDetailViewController(transaction: Domain.Transaction) -> UIViewController {
+        return TransactionDetailViewController(transaction: transaction)
     }
     
     // MARK: - ProfileFactory

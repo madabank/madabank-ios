@@ -4,6 +4,7 @@ import Auth
 import Home
 import Accounts
 import Cards
+import Transactions
 
 class AppCoordinator: AuthCoordinatorDelegate, HomeCoordinatorDelegate {
     
@@ -64,7 +65,13 @@ class AppCoordinator: AuthCoordinatorDelegate, HomeCoordinatorDelegate {
         accountsCoord.start()
         self.accountsCoordinator = accountsCoord
         
-        tabBarController.viewControllers = [homeNav, cardsNav, accountsNav]
+        // 4. Transactions Tab
+        let transactionsNav = UINavigationController()
+        transactionsNav.tabBarItem = UITabBarItem(title: "History", image: UIImage(systemName: "list.bullet.rectangle"), tag: 3)
+        let transactionsCoord = TransactionsCoordinator(navigationController: transactionsNav, factory: AppDIContainer.shared)
+        transactionsCoord.start()
+        
+        tabBarController.viewControllers = [homeNav, cardsNav, accountsNav, transactionsNav]
         tabBarController.tabBar.tintColor = ColorSystem.primary
         
         window.rootViewController = tabBarController
