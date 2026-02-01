@@ -1,0 +1,32 @@
+# macOS
+.DS_Store
+
+# Xcode
+build/
+*.derived
+*.ll
+*.o
+*.old
+*.dia
+*.moved-aside
+*.xccheckout
+*.xcscmblueprint
+DerivedData/
+
+# Tuist
+Tuist/.build/
+Tuist/Derive/
+Tuist/Graph/
+*.xcworkspace
+*.xcodeproj
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+
+# Other
+*.swp
+*~
+.apple/

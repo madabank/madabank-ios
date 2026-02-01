@@ -32,15 +32,16 @@ final class AppDIContainer: AuthFactory, HomeFactory, AccountsFactory, CardsFact
     // func makeGetCardsUseCase()...
     
     // MARK: - AuthFactory
-    func makeLoginViewController(coordinator: AuthCoordinator) -> UIViewController {
-        let vm = LoginViewModel(loginUseCase: makeLoginUseCase())
+    func makeLoginViewController(actions: LoginViewModelActions) -> UIViewController {
+        let vm = LoginViewModel(loginUseCase: makeLoginUseCase(), actions: actions)
         let vc = LoginViewController(viewModel: vm)
-        _ = vm.loginSuccess.subscribe(onNext: { coordinator.didLogin() })
         return vc
     }
+    func makeRegisterViewController() -> UIViewController { return UIViewController() }
+    func makeForgotPasswordViewController() -> UIViewController { return UIViewController() }
     
     // MARK: - HomeFactory
-    func makeHomeViewController(coordinator: HomeCoordinator) -> UIViewController {
+    func makeHomeViewController() -> UIViewController {
         let vm = HomeViewModel(userRepository: userRepository, getAccountsUseCase: makeGetAccountsUseCase())
         return HomeViewController(viewModel: vm)
     }
