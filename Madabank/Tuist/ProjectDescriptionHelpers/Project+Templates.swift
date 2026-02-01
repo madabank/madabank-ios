@@ -39,7 +39,10 @@ public extension Project {
                             ]
                         ],
                         "UISupportedInterfaceOrientations": ["UIInterfaceOrientationPortrait"],
-                        "CFBundleDisplayName": "Madabank"
+                        "CFBundleDisplayName": "Madabank",
+                        "NSAppTransportSecurity": [
+                            "NSAllowsArbitraryLoads": true
+                        ]
                     ]),
                     sources: ["Madabank/Sources/**"],
                     resources: ["Madabank/Resources/**"],
