@@ -21,6 +21,18 @@ class AppCoordinator: AuthCoordinatorDelegate, HomeCoordinatorDelegate {
     }
     
     public func start() {
+        // Show Splash Screen first
+        let splashVC = SplashViewController()
+        window.rootViewController = splashVC
+        window.makeKeyAndVisible()
+        
+        // Simulate delay or check state
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
+            self?.checkAuthStateAndRedirect()
+        }
+    }
+    
+    private func checkAuthStateAndRedirect() {
         if TokenManager.shared.isLoggedIn {
             showMain()
         } else {
