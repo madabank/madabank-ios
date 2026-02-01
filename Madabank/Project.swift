@@ -15,6 +15,7 @@ let project = Project.app(
         
         // External dependencies for the main app
         .external(name: "RxSwift"),
-        .external(name: "RxCocoa")
+        .external(name: "RxCocoa"),
+        .external(name: "netfox")
     ]
 )
