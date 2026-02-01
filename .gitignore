@@ -21,10 +21,13 @@ DerivedData/
 *.xcuserstate
 *.xcworkspace/xcuserdata/
 *.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcworkspace/
+*.xcodeproj/schemes/
 
 # Tuist
 Tuist/.build/
-Tuist/Derive/
+Tuist/.derived/
+Tuist/Derived/
 Tuist/Graph/
 *.xcworkspace
 *.xcodeproj
@@ -41,10 +44,11 @@ fastlane/screenshots
 fastlane/test_output
 vendor/bundle
 
-# CocoaPods (if used)
+# CocoaPods
 Pods/
+Podfile.lock
 
-# Carthage (if used)
+# Carthage
 Carthage/Build/
 
 # Test outputs
@@ -67,3 +71,4 @@ coverage/
 # Other
 .apple/
 Thumbs.db
+
