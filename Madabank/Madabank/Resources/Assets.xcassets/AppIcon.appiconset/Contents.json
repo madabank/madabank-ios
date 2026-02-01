@@ -1,7 +1,7 @@
 {
   "images" : [
     {
-      "filename" : "madabank_appicon 2.png",
+      "filename" : "iOS Icon - ADA C5 (3) 2.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
@@ -13,7 +13,7 @@
           "value" : "dark"
         }
       ],
-      "filename" : "madabank_appicon 1.png",
+      "filename" : "iOS Icon - ADA C5 (3) 1.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
@@ -25,7 +25,7 @@
           "value" : "tinted"
         }
       ],
-      "filename" : "madabank_appicon.png",
+      "filename" : "iOS Icon - ADA C5 (3).png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
