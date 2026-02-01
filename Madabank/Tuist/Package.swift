@@ -7,10 +7,10 @@ import PackageDescription
     let packageSettings = PackageSettings(
         productTypes: [
             "Alamofire": .framework,
-            "RxSwift": .staticFramework,
-            "RxCocoa": .staticFramework,
-            "RxCocoaRuntime": .staticFramework,
-            "RxRelay": .staticFramework,
+            "RxSwift": .framework,
+            "RxCocoa": .framework,
+            "RxCocoaRuntime": .framework,
+            "RxRelay": .framework,
             "SnapKit": .framework
         ]
     )
