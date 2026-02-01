@@ -1,4 +1,5 @@
 import UIKit
+import Core
 import Auth
 import Home
 
@@ -15,9 +16,12 @@ class AppCoordinator: AuthCoordinatorDelegate {
     }
     
     func start() {
-        // Check if logged in (could check Token storage)
-        // For now, assume Not Logged In -> Show Auth
-        showAuth()
+        // Check if user is already logged in
+        if TokenManager.shared.isLoggedIn {
+            showMain()
+        } else {
+            showAuth()
+        }
     }
     
     private func showAuth() {
