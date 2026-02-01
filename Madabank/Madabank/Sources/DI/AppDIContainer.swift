@@ -43,6 +43,10 @@ final class AppDIContainer: AuthFactory, HomeFactory, AccountsFactory, CardsFact
         ) 
     }
     
+    func makeCheckSystemStatusUseCase() -> CheckSystemStatusUseCaseProtocol {
+        return CheckSystemStatusUseCase(networkManager: networkManager)
+    }
+    
     // Cards Use Cases
     func makeGetCardsUseCase() -> GetCardsUseCaseProtocol { return GetCardsUseCase(repository: cardRepository) }
     func makeManageCardUseCase() -> ManageCardUseCaseProtocol { return ManageCardUseCase(repository: cardRepository) }

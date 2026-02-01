@@ -5,6 +5,7 @@ import Home
 import Accounts
 import Cards
 import Transactions
+import Domain
 
 class AppCoordinator: AuthCoordinatorDelegate, HomeCoordinatorDelegate {
     
@@ -23,13 +24,21 @@ class AppCoordinator: AuthCoordinatorDelegate, HomeCoordinatorDelegate {
     public func start() {
         // Show Splash Screen first
         let splashVC = SplashViewController()
+        let checkUseCase = AppDIContainer.shared.makeCheckSystemStatusUseCase()
+        
+        splashVC.onCheckStatus = {
+            return await checkUseCase.execute()
+        }
+        
+        splashVC.onSuccess = { [weak self] in
+            // Add small delay for better UX if check is too fast
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                self?.checkAuthStateAndRedirect()
+            }
+        }
+        
         window.rootViewController = splashVC
         window.makeKeyAndVisible()
-        
-        // Simulate delay or check state
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
-            self?.checkAuthStateAndRedirect()
-        }
     }
     
     private func checkAuthStateAndRedirect() {
