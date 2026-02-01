@@ -26,6 +26,8 @@ final class AppDIContainer: AuthFactory, HomeFactory, AccountsFactory, CardsFact
     
     // Use Cases
     func makeLoginUseCase() -> LoginUseCaseProtocol { return LoginUseCase(repository: authRepository) }
+    func makeRegisterUseCase() -> RegisterUseCaseProtocol { return RegisterUseCase(repository: authRepository) }
+    func makeForgotPasswordUseCase() -> ForgotPasswordUseCaseProtocol { return ForgotPasswordUseCase(repository: authRepository) }
     func makeGetAccountsUseCase() -> GetAccountsUseCaseProtocol { return GetAccountsUseCase(repository: accountRepository) }
     func makeGetProfileUseCase() -> GetProfileUseCaseProtocol { return GetProfileUseCase(repository: userRepository) }
     func makeTransferMoneyUseCase() -> TransferMoneyUseCaseProtocol { return TransferMoneyUseCase(repository: transactionRepository) }
@@ -37,8 +39,16 @@ final class AppDIContainer: AuthFactory, HomeFactory, AccountsFactory, CardsFact
         let vc = LoginViewController(viewModel: vm)
         return vc
     }
-    func makeRegisterViewController() -> UIViewController { return UIViewController() }
-    func makeForgotPasswordViewController() -> UIViewController { return UIViewController() }
+    
+    func makeRegisterViewController(actions: RegisterViewModelActions) -> UIViewController {
+        let vm = RegisterViewModel(registerUseCase: makeRegisterUseCase(), actions: actions)
+        return RegisterViewController(viewModel: vm)
+    }
+    
+    func makeForgotPasswordViewController(actions: ForgotPasswordViewModelActions) -> UIViewController {
+        let vm = ForgotPasswordViewModel(forgotPasswordUseCase: makeForgotPasswordUseCase(), actions: actions)
+        return ForgotPasswordViewController(viewModel: vm)
+    }
     
     // MARK: - HomeFactory
     func makeHomeViewController() -> UIViewController {

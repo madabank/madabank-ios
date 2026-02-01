@@ -57,6 +57,16 @@ public extension Project {
                     infoPlist: .default,
                     sources: ["Madabank/Tests/**"],
                     dependencies: [.target(name: name)]
+                ),
+                .target(
+                    name: "\(name)UITests",
+                    destinations: destinations,
+                    product: .uiTests,
+                    bundleId: "online.darisadam.\(name.lowercased()).uitests",
+                    deploymentTargets: deploymentTargets,
+                    infoPlist: .default,
+                    sources: ["Madabank/UITests/**"],
+                    dependencies: [.target(name: name)]
                 )
             ],
             schemes: [
@@ -64,7 +74,10 @@ public extension Project {
                     name: name,
                     shared: true,
                     buildAction: .buildAction(targets: [.target(name)]),
-                    testAction: .targets([.testableTarget(target: .target("\(name)Tests"))]),
+                    testAction: .targets([
+                        .testableTarget(target: .target("\(name)Tests")),
+                        .testableTarget(target: .target("\(name)UITests"))
+                    ]),
                     runAction: .runAction(configuration: .debug, executable: .target(name))
                 )
             ]
