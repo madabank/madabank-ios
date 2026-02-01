@@ -1,5 +1,7 @@
 # macOS
 .DS_Store
+.AppleDouble
+.LSOverride
 
 # Xcode
 build/
@@ -11,7 +13,14 @@ build/
 *.moved-aside
 *.xccheckout
 *.xcscmblueprint
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
 DerivedData/
+*.xcuserstate
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
 
 # Tuist
 Tuist/.build/
@@ -20,13 +29,41 @@ Tuist/Graph/
 *.xcworkspace
 *.xcodeproj
 
+# Swift Package Manager
+.build/
+.swiftpm/
+Package.resolved
+
 # Fastlane
 fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots
 fastlane/test_output
+vendor/bundle
 
-# Other
+# CocoaPods (if used)
+Pods/
+
+# Carthage (if used)
+Carthage/Build/
+
+# Test outputs
+*.xcresult
+coverage/
+
+# IDE
+.idea/
 *.swp
 *~
+.vscode/
+
+# Environment & Secrets
+.env
+.env.*
+*.pem
+*.p12
+*.mobileprovision
+
+# Other
 .apple/
+Thumbs.db
