@@ -11,7 +11,8 @@ import PackageDescription
             "RxCocoa": .framework,
             "RxCocoaRuntime": .framework,
             "RxRelay": .framework,
-            "SnapKit": .framework
+            "SnapKit": .framework,
+            "netfox": .framework
         ]
     )
 #endif
@@ -21,6 +22,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/Alamofire/Alamofire", from: "5.9.0"),
         .package(url: "https://github.com/ReactiveX/RxSwift", from: "6.7.0"),
-        .package(url: "https://github.com/SnapKit/SnapKit", from: "5.7.0")
+        .package(url: "https://github.com/SnapKit/SnapKit", from: "5.7.0"),
+        .package(url: "https://github.com/kasketis/netfox", from: "1.21.0")
     ]
 )
