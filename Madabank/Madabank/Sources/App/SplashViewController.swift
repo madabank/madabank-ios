@@ -48,13 +48,32 @@ public class SplashViewController: UIViewController {
         checkStatus()
     }
     
+    private var pollingTimer: Timer?
+    
+    private let errorContainerView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .systemBackground // Covers everything
+        view.isHidden = true
+        return view
+    }()
+    
+    // UI Components moved to container where appropriate or keep separate
+    
+    public override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        stopPolling()
+    }
+    
     private func setupUI() {
         view.backgroundColor = .systemBackground
         
         view.addSubview(titleLabel)
         view.addSubview(loadingIndicator)
-        view.addSubview(errorLabel)
-        view.addSubview(retryButton)
+        
+        // Full screen error container
+        view.addSubview(errorContainerView)
+        errorContainerView.addSubview(errorLabel)
+        errorContainerView.addSubview(retryButton)
         
         titleLabel.snp.makeConstraints { make in
             make.center.equalToSuperview()
@@ -65,13 +84,17 @@ public class SplashViewController: UIViewController {
             make.centerX.equalToSuperview()
         }
         
+        errorContainerView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+        
         errorLabel.snp.makeConstraints { make in
-            make.top.equalTo(loadingIndicator.snp.bottom).offset(20)
-            make.leading.trailing.equalToSuperview().inset(20)
+            make.center.equalToSuperview()
+            make.leading.trailing.equalToSuperview().inset(40)
         }
         
         retryButton.snp.makeConstraints { make in
-            make.top.equalTo(errorLabel.snp.bottom).offset(20)
+            make.top.equalTo(errorLabel.snp.bottom).offset(30)
             make.centerX.equalToSuperview()
             make.width.equalTo(120)
         }
@@ -82,13 +105,13 @@ public class SplashViewController: UIViewController {
     }
     
     @objc private func didTapRetry() {
+        stopPolling()
         resetUI()
         checkStatus()
     }
     
     private func resetUI() {
-        errorLabel.isHidden = true
-        retryButton.isHidden = true
+        errorContainerView.isHidden = true
         loadingIndicator.startAnimating()
     }
     
@@ -104,23 +127,41 @@ public class SplashViewController: UIViewController {
     }
     
     private func handleStatus(_ status: SystemStatus) {
-        loadingIndicator.stopAnimating()
         
         switch status {
         case .healthy:
+            stopPolling()
+            loadingIndicator.stopAnimating()
             onSuccess?()
         case .maintenance:
+            loadingIndicator.stopAnimating()
             showError("System Under Maintenance\nPlease try again later.")
+            startPolling()
         case .noInternet:
+            loadingIndicator.stopAnimating()
             showError("No Internet Connection\nPlease check your network.")
+            startPolling()
         case .unknown:
+            loadingIndicator.stopAnimating()
             showError("Unknown Error Occurred")
+            startPolling()
         }
     }
     
     private func showError(_ message: String) {
         errorLabel.text = message
-        errorLabel.isHidden = false
-        retryButton.isHidden = false
+        errorContainerView.isHidden = false
+    }
+    
+    private func startPolling() {
+        guard pollingTimer == nil else { return }
+        pollingTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { [weak self] _ in
+            self?.checkStatus()
+        }
+    }
+    
+    private func stopPolling() {
+        pollingTimer?.invalidate()
+        pollingTimer = nil
     }
 }
