@@ -21,8 +21,7 @@ final class AppDIContainer: AuthFactory, HomeFactory, AccountsFactory, CardsFact
     lazy var userRepository: UserRepositoryProtocol = UserRepository(networkManager: networkManager)
     lazy var accountRepository: AccountRepositoryProtocol = AccountRepository(networkManager: networkManager)
     lazy var transactionRepository: TransactionRepositoryProtocol = TransactionRepository(networkManager: networkManager)
-    // lazy var cardRepository: CardRepositoryProtocol = CardRepository... (Must implement CardRepository first, but for now Stub)
-    // Stubbing CardRepositoryProtocol usage for POC if not implemented
+    lazy var cardRepository: CardRepositoryProtocol = CardRepository(networkManager: networkManager)
     
     // Use Cases
     func makeLoginUseCase() -> LoginUseCaseProtocol { return LoginUseCase(repository: authRepository) }
@@ -43,6 +42,10 @@ final class AppDIContainer: AuthFactory, HomeFactory, AccountsFactory, CardsFact
             accountRepository: accountRepository
         ) 
     }
+    
+    // Cards Use Cases
+    func makeGetCardsUseCase() -> GetCardsUseCaseProtocol { return GetCardsUseCase(repository: cardRepository) }
+    func makeManageCardUseCase() -> ManageCardUseCaseProtocol { return ManageCardUseCase(repository: cardRepository) }
     
     // MARK: - AuthFactory
     func makeLoginViewController(actions: LoginViewModelActions) -> UIViewController {
@@ -102,16 +105,18 @@ final class AppDIContainer: AuthFactory, HomeFactory, AccountsFactory, CardsFact
     }
     
     // MARK: - CardsFactory
-    // Temporary stub since CardRepository not implemented in Step 956? Yes checked 956-963, CardRepo missing.
-    // I will return empty VC or dummy to compile.
-    func makeCardsViewController() -> UIViewController {
-        // Need CardsViewModel. CardsViewModel needs GetCardsUseCase. 
-        // I haven't implemented CardRepository in Data layer.
-        // I will just return UIViewController() for safety or implement Data Layer.
-        // Best: Implement Data Layer.
-        let vc = UIViewController()
-        vc.view.backgroundColor = .cyan
-        vc.title = "Cards (Repo Missing)"
-        return vc
+    func makeCardsViewController(actions: CardsViewModelActions) -> UIViewController {
+        let vm = CardsViewModel(
+            getAccountsUseCase: makeGetAccountsUseCase(),
+            getCardsUseCase: makeGetCardsUseCase(),
+            manageCardUseCase: makeManageCardUseCase(),
+            actions: actions
+        )
+        return CardsViewController(viewModel: vm)
+    }
+    
+    func makeCardDetailViewController(card: Domain.Card) -> UIViewController {
+        let vm = CardDetailViewModel(card: card, manageCardUseCase: makeManageCardUseCase())
+        return CardDetailViewController(viewModel: vm)
     }
 }
