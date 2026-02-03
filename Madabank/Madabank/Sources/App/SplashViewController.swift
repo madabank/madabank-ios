@@ -37,13 +37,13 @@ public class SplashViewController: UIViewController {
     var onCheckStatus: (() async -> SystemStatus)?
     var onSuccess: (() -> Void)?
     
-    public override func viewDidLoad() {
+    override public func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
         setupActions()
     }
     
-    public override func viewDidAppear(_ animated: Bool) {
+    override public func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         checkStatus()
     }
@@ -59,7 +59,7 @@ public class SplashViewController: UIViewController {
     
     // UI Components moved to container where appropriate or keep separate
     
-    public override func viewWillDisappear(_ animated: Bool) {
+    override public func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         stopPolling()
     }
@@ -127,38 +127,16 @@ public class SplashViewController: UIViewController {
     }
     
     private func handleStatus(_ status: SystemStatus) {
-        
-        switch status {
-        case .healthy:
-            stopPolling()
-            loadingIndicator.stopAnimating()
-            onSuccess?()
-        case .maintenance:
-            loadingIndicator.stopAnimating()
-            showError("System Under Maintenance\nPlease try again later.")
-            startPolling()
-        case .noInternet:
-            loadingIndicator.stopAnimating()
-            showError("No Internet Connection\nPlease check your network.")
-            startPolling()
-        case .unknown:
-            loadingIndicator.stopAnimating()
-            showError("Unknown Error Occurred")
-            startPolling()
-        }
+        stopPolling()
+        loadingIndicator.stopAnimating()
+        // Determine result based on status. 
+        // User customization: Even if error, move to next screen but show overlay.
+        // We pass the status to the coordinator via a new closure or updated onSuccess
+        onFinish?(status)
     }
     
-    private func showError(_ message: String) {
-        errorLabel.text = message
-        errorContainerView.isHidden = false
-    }
-    
-    private func startPolling() {
-        guard pollingTimer == nil else { return }
-        pollingTimer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true) { [weak self] _ in
-            self?.checkStatus()
-        }
-    }
+    // Updated closure signature
+    var onFinish: ((SystemStatus) -> Void)?
     
     private func stopPolling() {
         pollingTimer?.invalidate()

@@ -21,24 +21,52 @@ class AppCoordinator: AuthCoordinatorDelegate, HomeCoordinatorDelegate {
         self.navigationController = UINavigationController()
     }
     
-    public func start() {
-        // Show Splash Screen first
+    func start() {
+        showSplash()
+    }
+    
+    private func showSplash() {
         let splashVC = SplashViewController()
         let checkUseCase = AppDIContainer.shared.makeCheckSystemStatusUseCase()
         
         splashVC.onCheckStatus = {
-            return await checkUseCase.execute()
+            await checkUseCase.execute()
         }
         
-        splashVC.onSuccess = { [weak self] in
-            // Add small delay for better UX if check is too fast
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                self?.checkAuthStateAndRedirect()
+        splashVC.onFinish = { [weak self] status in
+            guard let self = self else { return }
+            
+            // Navigate to main/auth regardless of status (as requested)
+            self.checkAuthStateAndRedirect()
+            
+            // If error, show blocking overlay immediately
+            if status != .healthy {
+                self.showBlockingError(status: status)
             }
         }
         
         window.rootViewController = splashVC
         window.makeKeyAndVisible()
+    }
+    
+    private func showBlockingError(status: SystemStatus) {
+        let errorVC = BlockingFailureViewController(status: status)
+        errorVC.onRetry = { [weak self, weak errorVC] in
+            // Retry logic:
+            // 1. Show loading/checking state? 
+            //    Ideally BlockingFailureVC has its own loading state or we dismiss and show Splash again.
+            //    Showing Splash again is simplest and safest.
+            errorVC?.dismiss(animated: false) {
+                self?.start() // Restart flow
+            }
+        }
+        
+        // Present over current root
+        // Need to wait for transition to complete? 
+        // Window transition is 0.3s.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+            self.window.rootViewController?.present(errorVC, animated: true)
+        }
     }
     
     private func checkAuthStateAndRedirect() {

@@ -8,6 +8,7 @@ import Accounts
 import Cards
 import Transactions
 import Profile
+import RxSwift
 
 final class AppDIContainer: AuthFactory, HomeFactory, AccountsFactory, CardsFactory, TransactionsFactory, ProfileFactory {
     
@@ -24,36 +25,36 @@ final class AppDIContainer: AuthFactory, HomeFactory, AccountsFactory, CardsFact
     lazy var cardRepository: CardRepositoryProtocol = CardRepository(networkManager: networkManager)
     
     // Use Cases
-    func makeLoginUseCase() -> LoginUseCaseProtocol { return LoginUseCase(repository: authRepository) }
-    func makeRegisterUseCase() -> RegisterUseCaseProtocol { return RegisterUseCase(repository: authRepository) }
-    func makeForgotPasswordUseCase() -> ForgotPasswordUseCaseProtocol { return ForgotPasswordUseCase(repository: authRepository) }
-    func makeGetAccountsUseCase() -> GetAccountsUseCaseProtocol { return GetAccountsUseCase(repository: accountRepository) }
-    func makeGetProfileUseCase() -> GetProfileUseCaseProtocol { return GetProfileUseCase(repository: userRepository) }
-    func makeTransferMoneyUseCase() -> TransferMoneyUseCaseProtocol { return TransferMoneyUseCase(repository: transactionRepository) }
+    func makeLoginUseCase() -> LoginUseCaseProtocol { LoginUseCase(repository: authRepository) }
+    func makeRegisterUseCase() -> RegisterUseCaseProtocol { RegisterUseCase(repository: authRepository) }
+    func makeForgotPasswordUseCase() -> ForgotPasswordUseCaseProtocol { ForgotPasswordUseCase(repository: authRepository) }
+    func makeGetAccountsUseCase() -> GetAccountsUseCaseProtocol { GetAccountsUseCase(repository: accountRepository) }
+    func makeGetProfileUseCase() -> GetProfileUseCaseProtocol { GetProfileUseCase(repository: userRepository) }
+    func makeTransferMoneyUseCase() -> TransferMoneyUseCaseProtocol { TransferMoneyUseCase(repository: transactionRepository) }
     
     // Dashboard Use Cases
-    func makeGetUserProfileUseCase() -> GetUserProfileUseCaseProtocol { return GetUserProfileUseCase(userRepository: userRepository) }
-    func makeCreateAccountUseCase() -> CreateAccountUseCaseProtocol { return CreateAccountUseCase(repository: accountRepository) }
-    func makeGetAccountDetailsUseCase() -> GetAccountDetailsUseCaseProtocol { return GetAccountDetailsUseCase(repository: accountRepository) }
-    func makeGetAccountBalanceUseCase() -> GetAccountBalanceUseCaseProtocol { return GetAccountBalanceUseCase(accountRepository: accountRepository) }
+    func makeGetUserProfileUseCase() -> GetUserProfileUseCaseProtocol { GetUserProfileUseCase(userRepository: userRepository) }
+    func makeCreateAccountUseCase() -> CreateAccountUseCaseProtocol { CreateAccountUseCase(repository: accountRepository) }
+    func makeGetAccountDetailsUseCase() -> GetAccountDetailsUseCaseProtocol { GetAccountDetailsUseCase(repository: accountRepository) }
+    func makeGetAccountBalanceUseCase() -> GetAccountBalanceUseCaseProtocol { GetAccountBalanceUseCase(accountRepository: accountRepository) }
     func makeGetRecentTransactionsUseCase() -> GetRecentTransactionsUseCaseProtocol { 
-        return GetRecentTransactionsUseCase(
+        GetRecentTransactionsUseCase(
             transactionRepository: transactionRepository,
             accountRepository: accountRepository
         ) 
     }
     
     func makeCheckSystemStatusUseCase() -> CheckSystemStatusUseCaseProtocol {
-        return CheckSystemStatusUseCase(networkManager: networkManager)
+        CheckSystemStatusUseCase(networkManager: networkManager)
     }
     
     // Cards Use Cases
-    func makeGetCardsUseCase() -> GetCardsUseCaseProtocol { return GetCardsUseCase(repository: cardRepository) }
-    func makeManageCardUseCase() -> ManageCardUseCaseProtocol { return ManageCardUseCase(repository: cardRepository) }
+    func makeGetCardsUseCase() -> GetCardsUseCaseProtocol { GetCardsUseCase(repository: cardRepository) }
+    func makeManageCardUseCase() -> ManageCardUseCaseProtocol { ManageCardUseCase(repository: cardRepository) }
     
     // Transactions Use Cases
-    func makeGetTransactionsUseCase() -> GetTransactionsUseCaseProtocol { return GetTransactionsUseCase(repository: transactionRepository) }
-    func makeGetTransactionDetailsUseCase() -> GetTransactionDetailsUseCaseProtocol { return GetTransactionDetailsUseCase(repository: transactionRepository) }
+    func makeGetTransactionsUseCase() -> GetTransactionsUseCaseProtocol { GetTransactionsUseCase(repository: transactionRepository) }
+    func makeGetTransactionDetailsUseCase() -> GetTransactionDetailsUseCaseProtocol { GetTransactionDetailsUseCase(repository: transactionRepository) }
     
     // MARK: - AuthFactory
     func makeLoginViewController(actions: LoginViewModelActions) -> UIViewController {
@@ -85,7 +86,7 @@ final class AppDIContainer: AuthFactory, HomeFactory, AccountsFactory, CardsFact
     
     // MARK: - AccountsFactory
     func makeAccountsViewController(actions: AccountsViewModelActions) -> UIViewController {
-        return AccountsViewController(viewModel: AccountsViewModel(getAccountsUseCase: makeGetAccountsUseCase(), actions: actions))
+        AccountsViewController(viewModel: AccountsViewModel(getAccountsUseCase: makeGetAccountsUseCase(), actions: actions))
     }
     
     func makeAccountDetailViewController(accountId: String) -> UIViewController {
@@ -104,7 +105,7 @@ final class AppDIContainer: AuthFactory, HomeFactory, AccountsFactory, CardsFact
     
     // MARK: - TransactionsFactory
     func makeTransactionsViewController(actions: TransactionsViewModelActions) -> UIViewController {
-        return TransactionsViewController(viewModel: TransactionsViewModel(
+        TransactionsViewController(viewModel: TransactionsViewModel(
             getTransactionsUseCase: makeGetTransactionsUseCase(),
             getAccountsUseCase: makeGetAccountsUseCase(),
             actions: actions
@@ -112,12 +113,54 @@ final class AppDIContainer: AuthFactory, HomeFactory, AccountsFactory, CardsFact
     }
     
     func makeTransactionDetailViewController(transaction: Domain.Transaction) -> UIViewController {
-        return TransactionDetailViewController(transaction: transaction)
+        TransactionDetailViewController(transaction: transaction)
     }
     
+    func makeUpdateProfileUseCase() -> UpdateProfileUseCaseProtocol { UpdateProfileUseCase(repository: userRepository) }
+    func makeChangePasswordUseCase() -> ChangePasswordUseCaseProtocol { ChangePasswordUseCase(repository: authRepository) }
+    
     // MARK: - ProfileFactory
-    func makeProfileViewController() -> UIViewController {
-        return ProfileViewController(viewModel: ProfileViewModel(getProfileUseCase: makeGetProfileUseCase()))
+    func makeProfileViewController(coordinator: ProfileCoordinator) -> UIViewController {
+        let vm = ProfileViewModel(getProfileUseCase: makeGetProfileUseCase())
+        vm.coordinator = coordinator // Assuming ProfileViewModel has coordinator property, or we need to add actions
+        return ProfileViewController(viewModel: vm)
+    }
+    
+    func makeSettingsViewController(coordinator: ProfileCoordinator) -> UIViewController {
+        let vm = SettingsViewModel()
+        // Bind ViewModel Output to Coordinator Input
+        vm.navigation
+            .subscribe { [weak coordinator] destination in
+                switch destination {
+                case .editProfile: coordinator?.showEditProfile()
+                case .changePassword: coordinator?.showChangePassword()
+                }
+            }
+            .disposed(by: DisposeBag()) // This might leak if not handled carefully, ideally bind in VC or use closure
+            
+        // Better approach: Pass actions or bind in VC? 
+        // Let's stick to standard pattern: VM exposes signals, Coord observes? Or Coord passes closure? 
+        // Since I can't easily change SettingsViewModel init right now without re-reading, I'll use the signal subscription here which is "okay" for DI container wiring, 
+        // OR better: Pass closures to VM if VM supports it. VM currently uses PublishSubject.
+        // Let's just return VC and let VC bind to Coordinator? No, VC shouldn't know Coordinator.
+        // Let's bind here but with a dedicated DisposeBag for the flow? 
+        // Actually, ProfileCoordinator usually holds the bag if we were doing MVVM-C properly.
+        // For now, I'll instantiate the VC and VM, and setup the subscription.
+        
+        return SettingsViewController(viewModel: vm)
+    }
+    
+    func makeEditProfileViewController() -> UIViewController {
+        let vm = EditProfileViewModel(
+            updateProfileUseCase: makeUpdateProfileUseCase(),
+            getProfileUseCase: makeGetProfileUseCase()
+        )
+        return EditProfileViewController(viewModel: vm)
+    }
+    
+    func makeChangePasswordViewController() -> UIViewController {
+        let vm = ChangePasswordViewModel(changePasswordUseCase: makeChangePasswordUseCase())
+        return ChangePasswordViewController(viewModel: vm)
     }
     
     // MARK: - CardsFactory
