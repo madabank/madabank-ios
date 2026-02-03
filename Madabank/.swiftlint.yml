@@ -3,8 +3,8 @@
 
 # Paths to include
 included:
-  - Madabank/Madabank/Sources
-  - Madabank/Modules
+  - Madabank/Sources
+  - Modules
 
 # Paths to exclude
 excluded:
@@ -107,8 +107,6 @@ function_parameter_count:
 nesting:
   type_level:
     warning: 3
-  statement_level:
-    warning: 5
 
 large_tuple:
   warning: 3

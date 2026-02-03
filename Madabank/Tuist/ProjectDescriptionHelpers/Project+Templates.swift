@@ -46,6 +46,19 @@ public extension Project {
                     ]),
                     sources: ["Madabank/Sources/**"],
                     resources: ["Madabank/Resources/**"],
+                    scripts: [
+                        .pre(
+                            script: """
+                                if which swiftlint >/dev/null; then
+                                  swiftlint
+                                else
+                                  echo "warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint"
+                                fi
+                                """,
+                            name: "SwiftLint",
+                            basedOnDependencyAnalysis: false
+                        )
+                    ],
                     dependencies: dependencies
                 ),
                 .target(
