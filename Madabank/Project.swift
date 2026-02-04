@@ -12,6 +12,7 @@ let project = Project.app(
         .module(.cards),
         .module(.transactions),
         .module(.profile),
+        .module(.notifications),
         
         // External dependencies for the main app
         .external(name: "RxSwift"),

@@ -21,7 +21,9 @@ public enum Module: String, CaseIterable {
     case accounts = "Accounts"
     case cards = "Cards"
     case transactions = "Transactions"
+
     case profile = "Profile"
+    case notifications = "Notifications"
     
     public var name: String {
         return rawValue
@@ -31,7 +33,7 @@ public enum Module: String, CaseIterable {
         switch self {
         case .core, .networking, .domain, .data, .commonUI:
             return .shared
-        case .auth, .home, .accounts, .cards, .transactions, .profile:
+        case .auth, .home, .accounts, .cards, .transactions, .profile, .notifications:
             return .feature
         }
     }
@@ -81,6 +83,8 @@ public enum Module: String, CaseIterable {
             return [.domain, .data, .commonUI]
         case .profile:
             return [.domain, .data, .commonUI]
+        case .notifications:
+            return [.domain, .data, .commonUI]
         }
     }
     
@@ -97,7 +101,7 @@ public enum Module: String, CaseIterable {
             return []
         case .commonUI:
             return ["SnapKit", "RxSwift", "RxCocoa"]
-        case .auth, .home, .accounts, .cards, .transactions, .profile:
+        case .auth, .home, .accounts, .cards, .transactions, .profile, .notifications:
             return ["RxSwift", "RxCocoa"]
         }
     }
