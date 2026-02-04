@@ -7,7 +7,7 @@ public extension Project {
     /// Creates the main Madabank app project
     static func app(
         name: String,
-        destinations: Destinations = .iOS,
+        destinations: Destinations = [.iPhone],
         deploymentTargets: DeploymentTargets = .iOS("15.0"),
         dependencies: [TargetDependency]
     ) -> Project {
@@ -100,7 +100,7 @@ public extension Project {
     /// Creates a framework module project
     static func framework(
         module: Module,
-        destinations: Destinations = .iOS,
+        destinations: Destinations = [.iPhone],
         deploymentTargets: DeploymentTargets = .iOS("15.0")
     ) -> Project {
         let moduleDependencies: [TargetDependency] = module.dependencies.map { .project(target: $0.targetName, path: .relativeToRoot($0.path)) }
