@@ -15,6 +15,7 @@ class AppCoordinator: AuthCoordinatorDelegate, HomeCoordinatorDelegate {
     private var homeCoordinator: HomeCoordinator?
     private var accountsCoordinator: AccountsCoordinator?
     private var cardsCoordinator: CardsCoordinator?
+    private var transactionsCoordinator: TransactionsCoordinator?
     
     init(window: UIWindow) {
         self.window = window
@@ -119,6 +120,7 @@ class AppCoordinator: AuthCoordinatorDelegate, HomeCoordinatorDelegate {
         transactionsNav.tabBarItem = UITabBarItem(title: "History", image: UIImage(systemName: "list.bullet.rectangle"), tag: 3)
         let transactionsCoord = TransactionsCoordinator(navigationController: transactionsNav, factory: AppDIContainer.shared)
         transactionsCoord.start()
+        self.transactionsCoordinator = transactionsCoord
         
         tabBarController.viewControllers = [homeNav, cardsNav, accountsNav, transactionsNav]
         tabBarController.tabBar.tintColor = ColorSystem.primary
@@ -146,7 +148,23 @@ class AppCoordinator: AuthCoordinatorDelegate, HomeCoordinatorDelegate {
         }
     }
     
-    func homeCoordinatorDidRequestTransfer(_ coordinator: HomeCoordinator) {
-        print("Requested Transfer")
+        if let tabBar = window.rootViewController as? UITabBarController {
+            tabBar.selectedIndex = 3 // Switch to Transactions tab
+            transactionsCoordinator?.showTransfer()
+        }
+    }
+    
+    func homeCoordinatorDidRequestPayment(_ coordinator: HomeCoordinator) {
+        if let tabBar = window.rootViewController as? UITabBarController {
+            tabBar.selectedIndex = 3
+            transactionsCoordinator?.showWithdraw()
+        }
+    }
+    
+    func homeCoordinatorDidRequestTopUp(_ coordinator: HomeCoordinator) {
+        if let tabBar = window.rootViewController as? UITabBarController {
+            tabBar.selectedIndex = 3
+            transactionsCoordinator?.showDeposit()
+        }
     }
 }
