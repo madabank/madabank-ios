@@ -123,7 +123,11 @@ final class AppDIContainer: AuthFactory, HomeFactory, AccountsFactory, CardsFact
     }
     
     func makeTransactionDetailViewController(transaction: Domain.Transaction) -> UIViewController {
-        TransactionDetailViewController(transaction: transaction)
+        let vm = TransactionDetailViewModel(
+            transaction: transaction,
+            useCase: makeGetTransactionDetailsUseCase()
+        )
+        return TransactionDetailViewController(viewModel: vm)
     }
     
     func makeTransferViewController(actions: TransferViewModelActions) -> UIViewController {

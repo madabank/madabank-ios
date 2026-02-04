@@ -83,6 +83,13 @@ public extension Project {
                 )
             ],
             schemes: [
+                // Prod Scheme (Release)
+                .scheme(
+                    name: "\(name) (Prod)",
+                    shared: true,
+                    buildAction: .buildAction(targets: [.target(name)]),
+                    runAction: .runAction(configuration: .release, executable: .target(name))
+                ),
                 .scheme(
                     name: name,
                     shared: true,
@@ -121,6 +128,7 @@ public extension Project {
                     deploymentTargets: deploymentTargets,
                     infoPlist: .default,
                     sources: ["\(module.path)/Sources/**"],
+                    resources: ["\(module.path)/Resources/**"],
                     dependencies: moduleDependencies + externalDependencies
                 ),
                 .target(
