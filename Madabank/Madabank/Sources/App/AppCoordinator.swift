@@ -151,4 +151,12 @@ class AppCoordinator: AuthCoordinatorDelegate, HomeCoordinatorDelegate {
     func homeCoordinatorDidRequestTransfer(_ coordinator: HomeCoordinator) {
         print("Requested Transfer")
     }
+    
+    func homeCoordinatorDidRequestPayment(_ coordinator: HomeCoordinator) {
+        print("Requested Payment")
+    }
+    
+    func homeCoordinatorDidRequestTopUp(_ coordinator: HomeCoordinator) {
+        print("Requested Top Up")
+    }
 }

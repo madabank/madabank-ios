@@ -38,6 +38,7 @@ final class AppDIContainer: AuthFactory, HomeFactory, AccountsFactory, CardsFact
     func makeCreateAccountUseCase() -> CreateAccountUseCaseProtocol { CreateAccountUseCase(repository: accountRepository) }
     func makeGetAccountDetailsUseCase() -> GetAccountDetailsUseCaseProtocol { GetAccountDetailsUseCase(repository: accountRepository) }
     func makeGetAccountBalanceUseCase() -> GetAccountBalanceUseCaseProtocol { GetAccountBalanceUseCase(accountRepository: accountRepository) }
+    func makeCloseAccountUseCase() -> CloseAccountUseCaseProtocol { CloseAccountUseCase(repository: accountRepository) }
     func makeGetRecentTransactionsUseCase() -> GetRecentTransactionsUseCaseProtocol { 
         GetRecentTransactionsUseCase(
             transactionRepository: transactionRepository,
@@ -62,6 +63,7 @@ final class AppDIContainer: AuthFactory, HomeFactory, AccountsFactory, CardsFact
     // Cards Use Cases
     func makeGetCardsUseCase() -> GetCardsUseCaseProtocol { GetCardsUseCase(repository: cardRepository) }
     func makeManageCardUseCase() -> ManageCardUseCaseProtocol { ManageCardUseCase(repository: cardRepository) }
+    func makeIssueCardUseCase() -> IssueCardUseCaseProtocol { IssueCardUseCase(repository: cardRepository) }
     
     // Transactions Use Cases
     func makeGetTransactionsUseCase() -> GetTransactionsUseCaseProtocol { GetTransactionsUseCase(repository: transactionRepository) }
@@ -100,11 +102,13 @@ final class AppDIContainer: AuthFactory, HomeFactory, AccountsFactory, CardsFact
         AccountsViewController(viewModel: AccountsViewModel(getAccountsUseCase: makeGetAccountsUseCase(), actions: actions))
     }
     
-    func makeAccountDetailViewController(accountId: String) -> UIViewController {
+    func makeAccountDetailViewController(accountId: String, actions: AccountDetailViewModelActions) -> UIViewController {
         let vm = AccountDetailViewModel(
             accountId: accountId,
             getAccountDetailsUseCase: makeGetAccountDetailsUseCase(),
-            getRecentTransactionsUseCase: makeGetRecentTransactionsUseCase()
+            getRecentTransactionsUseCase: makeGetRecentTransactionsUseCase(),
+            closeAccountUseCase: makeCloseAccountUseCase(),
+            actions: actions
         )
         return AccountDetailViewController(viewModel: vm)
     }
@@ -242,9 +246,18 @@ final class AppDIContainer: AuthFactory, HomeFactory, AccountsFactory, CardsFact
         return CardsViewController(viewModel: vm)
     }
     
-    func makeCardDetailViewController(card: Domain.Card) -> UIViewController {
-        let vm = CardDetailViewModel(card: card, manageCardUseCase: makeManageCardUseCase())
+    func makeCardDetailViewController(card: Domain.Card, actions: CardDetailViewModelActions) -> UIViewController {
+        let vm = CardDetailViewModel(card: card, manageCardUseCase: makeManageCardUseCase(), actions: actions)
         return CardDetailViewController(viewModel: vm)
+    }
+    
+    func makeIssueCardViewController(actions: IssueCardViewModelActions) -> UIViewController {
+        let vm = IssueCardViewModel(
+            getAccountsUseCase: makeGetAccountsUseCase(),
+            issueCardUseCase: makeIssueCardUseCase(),
+            actions: actions
+        )
+        return IssueCardViewController(viewModel: vm)
     }
     
     // MARK: - NotificationsFactory
