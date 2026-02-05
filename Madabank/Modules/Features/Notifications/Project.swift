@@ -14,6 +14,7 @@ let project = Project(
             dependencies: [
                 .project(target: "Domain", path: "../../Shared/Domain"),
                 .project(target: "Data", path: "../../Shared/Data"),
+                .project(target: "Core", path: "../../Shared/Core"),
                 .project(target: "CommonUI", path: "../../Shared/CommonUI"),
                 .external(name: "RxSwift"),
                 .external(name: "RxCocoa")

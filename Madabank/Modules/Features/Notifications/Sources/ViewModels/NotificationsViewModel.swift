@@ -1,18 +1,21 @@
+
 import Foundation
 import RxSwift
 import RxCocoa
 import Domain
 
-public struct NotificationsViewModelActions {}
+public struct NotificationsViewModelActions {
+    public init() {}
+}
 
 public class NotificationsViewModel {
     
     // Inputs
-    public let viewDidLoad = PublishSubject<Void>()
-    public let refresh = PublishSubject<Void>()
+    public let viewDidLoad = PublishRelay<Void>()
+    public let refresh = PublishRelay<Void>()
     
     // Outputs
-    public let items: Driver<[Notification]>
+    public let items: Driver<[Domain.Notification]>
     public let isLoading: Driver<Bool>
     public let error: Driver<String>
     
@@ -20,6 +23,10 @@ public class NotificationsViewModel {
     private let getNotificationsUseCase: GetNotificationsUseCaseProtocol
     private let markReadUseCase: MarkNotificationReadUseCaseProtocol
     private let actions: NotificationsViewModelActions
+    
+    private let itemsRelay = BehaviorRelay<[Domain.Notification]>(value: [])
+    private let isLoadingRelay = BehaviorRelay<Bool>(value: false)
+    private let errorRelay = PublishRelay<String>()
     
     private let disposeBag = DisposeBag()
     
@@ -30,21 +37,38 @@ public class NotificationsViewModel {
         self.markReadUseCase = markReadUseCase
         self.actions = actions
         
-        let loadingIndicator = ActivityIndicator()
-        self.isLoading = loadingIndicator.asDriver()
+        self.items = itemsRelay.asDriver()
+        self.isLoading = isLoadingRelay.asDriver()
+        self.error = errorRelay.asDriver(onErrorJustReturn: "Unknown Error")
         
-        let errorTracker = ErrorTracker()
-        self.error = errorTracker.asDriver()
-        
-        let reload = Observable.merge(viewDidLoad, refresh)
-        
-        self.items = reload
-            .flatMapLatest { _ in
-                return getNotificationsUseCase.execute()
-                    .trackActivity(loadingIndicator)
-                    .trackError(errorTracker)
-                    .asDriver(onErrorJustReturn: [])
+        setupBindings()
+    }
+    
+    private func setupBindings() {
+        viewDidLoad
+            .subscribe(onNext: { [weak self] in self?.fetchNotifications() })
+            .disposed(by: disposeBag)
+            
+        refresh
+            .subscribe(onNext: { [weak self] in self?.fetchNotifications() })
+            .disposed(by: disposeBag)
+    }
+    
+    private func fetchNotifications() {
+        isLoadingRelay.accept(true)
+        Task {
+            do {
+                let notifications = try await getNotificationsUseCase.execute()
+                await MainActor.run {
+                    self.itemsRelay.accept(notifications)
+                    self.isLoadingRelay.accept(false)
+                }
+            } catch {
+                await MainActor.run {
+                    self.isLoadingRelay.accept(false)
+                    self.errorRelay.accept(error.localizedDescription)
+                }
             }
-            .asDriver(onErrorJustReturn: [])
+        }
     }
 }

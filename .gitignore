@@ -72,3 +72,6 @@ coverage/
 .apple/
 Thumbs.db
 
+
+# Logs
+*.log

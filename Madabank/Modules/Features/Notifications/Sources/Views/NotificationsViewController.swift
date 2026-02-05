@@ -54,7 +54,7 @@ public final class NotificationsViewController: UIViewController {
         super.viewDidLoad()
         setupUI()
         bindViewModel()
-        viewModel.viewDidLoad.onNext(())
+        viewModel.viewDidLoad.accept(())
     }
     
     // MARK: - Setup

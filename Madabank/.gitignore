@@ -89,6 +89,7 @@ Package.resolved
 *.swp
 *.swo
 *~
+*.log
 
 ### Fastlane ###
 fastlane/report.xml
