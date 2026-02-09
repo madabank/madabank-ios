@@ -105,4 +105,36 @@ final class AuthUITests: XCTestCase {
         XCTAssertTrue(title.waitForExistence(timeout: 3))
         XCTAssertTrue(app.buttons["Send Reset Link"].exists)
     }
+    // MARK: - Flow Tests
+    
+    func testLoginFlow() throws {
+        // Wait for login screen
+        let welcomeText = app.staticTexts["Welcome to Madabank"]
+        XCTAssertTrue(welcomeText.waitForExistence(timeout: 5))
+        
+        let emailField = app.textFields["Email"]
+        let passwordField = app.secureTextFields["Password"]
+        
+        // Enter credentials
+        if emailField.exists {
+            emailField.tap()
+            emailField.typeText("test@example.com")
+        }
+        
+        if passwordField.exists {
+            passwordField.tap()
+            passwordField.typeText("password123")
+        }
+        
+        // Tap Sign In
+        app.buttons["Sign In"].tap()
+        
+        // Verify navigation to Home (Dashboard)
+        // Adjust timeout because of 0.5s network delay simulation in Mock NetworkManager
+        let balanceLabel = app.staticTexts["Total Balance"]
+        XCTAssertTrue(balanceLabel.waitForExistence(timeout: 5))
+        
+        // Verify Tab Bar exists
+        XCTAssertTrue(app.tabBars.firstMatch.exists)
+    }
 }
