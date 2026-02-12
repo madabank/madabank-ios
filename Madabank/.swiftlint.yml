@@ -1,0 +1,15 @@
+parent_config: ../.swiftlint.yml
+
+included:
+  - Madabank/Sources
+  - Modules
+
+excluded:
+  - Tuist
+  - Derived
+  - "*/Derived/*"
+  - "*/Tests/*"
+  - Pods
+  - .build
+  - .tuist-bin
+  - vendor
