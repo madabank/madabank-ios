@@ -39,6 +39,9 @@ jobs:
       - name: Install Tuist
         run: mise install tuist
 
+      - name: Install SwiftLint
+        run: brew install swiftlint
+
       - name: Install dependencies
         working-directory: Madabank
         run: |
