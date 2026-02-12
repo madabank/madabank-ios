@@ -1,4 +1,3 @@
-
 import Foundation
 import RxSwift
 import RxCocoa
@@ -46,11 +45,11 @@ public class NotificationsViewModel {
     
     private func setupBindings() {
         viewDidLoad
-            .subscribe(onNext: { [weak self] in self?.fetchNotifications() })
+            .subscribe { [weak self] in self?.fetchNotifications() }
             .disposed(by: disposeBag)
             
         refresh
-            .subscribe(onNext: { [weak self] in self?.fetchNotifications() })
+            .subscribe { [weak self] in self?.fetchNotifications() }
             .disposed(by: disposeBag)
     }
     
