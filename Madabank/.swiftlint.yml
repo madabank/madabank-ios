@@ -34,7 +34,6 @@ opt_in_rules:
   - extension_access_modifier
   - fallthrough
   - fatal_error_message
-  - file_header
   - first_where
   - flatmap_over_map_reduce
   - force_unwrapping
@@ -116,14 +115,7 @@ force_cast: warning
 force_try: warning
 force_unwrapping: warning
 
-file_header:
-  required_pattern: |
-    \/\/
-    \/\/  .*\.swift
-    \/\/  .*
-    \/\/
-    \/\/  Created by .*
-    \/\/
+
 
 # Custom rules
 custom_rules:
