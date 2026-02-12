@@ -2,23 +2,15 @@ name: iOS CI
 
 # Manual trigger only - run by clicking "Run workflow" button on GitHub Actions page
 on:
+  pull_request:
+    branches:
+      - develop
   workflow_dispatch:
-    inputs:
-      run_tests:
-        description: 'Run unit tests'
-        required: false
-        default: 'true'
-        type: boolean
-      run_lint:
-        description: 'Run SwiftLint'
-        required: false
-        default: 'true'
-        type: boolean
 
 jobs:
-  build:
-    name: Build & Test
-    runs-on: macos-14
+  test:
+    name: Run Tests
+    runs-on: macos-15
     
     steps:
       - name: Checkout repository
@@ -50,13 +42,5 @@ jobs:
         
       - name: Run Fastlane CI
         working-directory: Madabank
-        env:
-          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
-          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
-          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
-          FASTLANE_PASSWORD: ${{ secrets.FASTLANE_PASSWORD }}
-          APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
-          APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
-          APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
         run: bundle exec fastlane ci
 

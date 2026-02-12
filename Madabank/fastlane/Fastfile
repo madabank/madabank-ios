@@ -51,7 +51,8 @@ platform :ios do
   
   desc "Build the app for testing"
   lane :build do
-    sync_certs if is_ci
+    # sync_certs is not needed for simulator builds and causes issues on forks without secrets
+    # sync_certs if is_ci
     
     gym(
       workspace: "Madabank.xcworkspace",
