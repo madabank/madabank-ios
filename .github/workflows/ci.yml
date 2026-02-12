@@ -31,8 +31,13 @@ jobs:
           bundler-cache: true
           working-directory: Madabank
           
+      - name: Install Mise
+        uses: jdx/mise-action@v2
+        with:
+          install: false
+
       - name: Install Tuist
-        run: curl -Ls https://install.tuist.io | bash
+        run: mise install tuist
 
       - name: Install dependencies
         working-directory: Madabank
