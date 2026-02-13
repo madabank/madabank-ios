@@ -1,5 +1,6 @@
 # Fastfile for Madabank iOS
 # Documentation: https://docs.fastlane.tools
+require 'base64'
 
 default_platform(:ios)
 
@@ -43,8 +44,19 @@ platform :ios do
   lane :sync_certs do
     # Ensure you have set up Match repo and environment variables
     # MATCH_PASSWORD, MATCH_GIT_URL, git_private_key (SSH)
-    match(type: "appstore", readonly: is_ci)
-    match(type: "development", readonly: is_ci)
+    
+    # Use GH_TOKEN for basic auth if available to avoid prompt issues
+    match_options = {
+        readonly: is_ci,
+        clone_branch_directly: true
+    }
+    
+    if ENV['GH_TOKEN']
+        match_options[:git_basic_authorization] = Base64.strict_encode64(":#{ENV['GH_TOKEN']}")
+    end
+    
+    match(match_options.merge(type: "appstore"))
+    match(match_options.merge(type: "development"))
   end
 
   # ==================== BUILD ====================
