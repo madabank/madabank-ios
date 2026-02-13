@@ -48,7 +48,8 @@ platform :ios do
     # Use GH_TOKEN for basic auth if available to avoid prompt issues
     match_options = {
         readonly: is_ci,
-        clone_branch_directly: true
+        clone_branch_directly: false,
+        git_branch: "main"
     }
     
     if ENV['GH_TOKEN']
