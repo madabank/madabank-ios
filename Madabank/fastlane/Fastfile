@@ -56,6 +56,15 @@ platform :ios do
         match_options[:git_basic_authorization] = Base64.strict_encode64(":#{ENV['GH_TOKEN']}")
     end
     
+    # Use keychain from setup_ci if available
+    if is_ci
+        keychain_path = LaneContext[SharedValues::KEYCHAIN_PATH]
+        if keychain_path
+            match_options[:keychain_name] = keychain_path
+            match_options[:keychain_password] = "" # setup_ci unlocks it
+        end
+    end
+    
     match(match_options.merge(type: "appstore"))
     match(match_options.merge(type: "development"))
   end
