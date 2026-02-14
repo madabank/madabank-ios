@@ -17,6 +17,7 @@ public extension Project {
                 automaticSchemesOptions: .disabled,
                 textSettings: .textSettings(usesTabs: false, indentWidth: 4, tabWidth: 4)
             ),
+            settings: .settings(base: ["SWIFT_STRICT_CONCURRENCY": "complete"]),
             targets: [
                 .target(
                     name: name,
@@ -119,6 +120,7 @@ public extension Project {
                 automaticSchemesOptions: .disabled,
                 textSettings: .textSettings(usesTabs: false, indentWidth: 4, tabWidth: 4)
             ),
+            settings: .settings(base: ["SWIFT_STRICT_CONCURRENCY": "complete"]),
             targets: [
                 .target(
                     name: module.targetName,

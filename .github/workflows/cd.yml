@@ -62,6 +62,7 @@ jobs:
       - name: Run Fastlane Beta
         working-directory: Madabank
         env:
+          APP_IDENTIFIER: 'online.darisadam.madabank'
           APPLE_ID: ${{ secrets.APPLE_ID }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
