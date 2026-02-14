@@ -32,8 +32,7 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.3'
-          bundler-cache: true
-          working-directory: Madabank
+          bundler-cache: false # Disable automatic cache to prevent conflicts
           
       - name: Install Mise
         uses: jdx/mise-action@v2
@@ -49,9 +48,13 @@ jobs:
       - name: Install dependencies
         working-directory: Madabank
         run: |
+          # Clean up any existing artifacts to ensure fresh install
+          rm -rf vendor/bundle Gemfile.lock
+          
+          # Install dependencies
+          bundle install --jobs 4 --retry 3
           tuist install
-          bundle install
-        
+          
       - name: Generate project
         working-directory: Madabank
         run: tuist generate

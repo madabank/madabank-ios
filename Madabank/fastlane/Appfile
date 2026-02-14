@@ -1,5 +1,5 @@
-app_identifier("online.darisadam.madabank")
-apple_id(ENV["APPLE_ID"] || "your-apple-id@example.com")
+app_identifier(ENV["APP_IDENTIFIER"])
+apple_id(ENV["APPLE_ID"])
 itc_team_id(ENV["ITC_TEAM_ID"])
 team_id(ENV["TEAM_ID"])
 

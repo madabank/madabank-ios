@@ -64,6 +64,7 @@ coverage/
 # Environment & Secrets
 .env
 .env.*
+!.env.default
 *.pem
 *.p12
 *.mobileprovision
