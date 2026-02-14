@@ -7,6 +7,7 @@ import Cards
 import Transactions
 import Domain
 
+@MainActor
 class AppCoordinator: AuthCoordinatorDelegate, HomeCoordinatorDelegate {
     
     var window: UIWindow

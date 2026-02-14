@@ -11,6 +11,7 @@ import Profile
 import Notifications
 import RxSwift
 
+@MainActor
 final class AppDIContainer: AuthFactory, HomeFactory, AccountsFactory, CardsFactory, TransactionsFactory, ProfileFactory, NotificationsFactory {
     
     static let shared = AppDIContainer()

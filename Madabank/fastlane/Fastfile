@@ -47,7 +47,7 @@ platform :ios do
     
     # Use GH_TOKEN for basic auth if available to avoid prompt issues
     match_options = {
-        readonly: is_ci,
+        readonly: false,
         clone_branch_directly: false,
         git_branch: "main"
     }
@@ -142,8 +142,10 @@ platform :ios do
     # Commit build number bump
     if is_ci
       # Configure git user for CI
-      sh("git config user.email 'daris.adam@madabank.art'")
-      sh("git config user.name 'Madabank Bot'")
+      git_user_email = ENV['GIT_USER_EMAIL'] || 'bot@madabank.art'
+      git_user_name = ENV['GIT_USER_NAME'] || 'Madabank Bot'
+      sh("git config user.email '#{git_user_email}'")
+      sh("git config user.name '#{git_user_name}'")
     end
     
     commit_version_bump(

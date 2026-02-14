@@ -1,5 +1,6 @@
 import XCTest
 
+@MainActor
 final class HomeUITests: XCTestCase {
 
     override func setUpWithError() throws {
