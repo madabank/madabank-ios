@@ -63,8 +63,8 @@ jobs:
           
       - name: Configure Git for Push
         run: |
-          git config --global user.email "bot@madabank.art"
-          git config --global user.name "Madabank Bot"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
           git remote set-url origin https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/${{ github.repository }}.git
 
       - name: Run Fastlane Beta
