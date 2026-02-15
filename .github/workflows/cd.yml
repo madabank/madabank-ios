@@ -3,6 +3,8 @@ name: Madabank CD
 on:
   push:
     branches: [ main ]
+  pull_request:
+    branches: [ develop ]
   workflow_dispatch:
 
 jobs:
@@ -38,7 +40,10 @@ jobs:
 
       - name: Install Tuist
         run: |
-          curl -Ls https://install.tuist.io | bash
+          curl https://mise.run | sh
+          export PATH="$HOME/.local/bin:$PATH"
+          mise use -g tuist
+          echo "$HOME/.local/share/mise/shims" >> $GITHUB_PATH
           tuist --version
 
       - name: Generate Project
