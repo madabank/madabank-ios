@@ -41,9 +41,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: Madabank/vendor/bundle
-          key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
+          key: ${{ runner.os }}-ruby-3.3-gems-${{ hashFiles('**/Gemfile.lock') }}
           restore-keys: |
-            ${{ runner.os }}-gems-
+            ${{ runner.os }}-ruby-3.3-gems-
 
       - name: Cache SPM Dependencies
         uses: actions/cache@v4
@@ -89,7 +89,7 @@ jobs:
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.0.1'
+          ruby-version: '3.3'
           bundler-cache: true
           working-directory: Madabank
 
