@@ -27,6 +27,9 @@ jobs:
       
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.GH_TOKEN }}
       
       - name: Select Xcode
         run: sudo xcode-select -s /Applications/Xcode_16.0.app
