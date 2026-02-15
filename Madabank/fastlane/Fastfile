@@ -37,7 +37,7 @@ platform :ios do
       scan(
         workspace: "Madabank.xcworkspace",
         scheme: scheme,
-        destination: "platform=iOS Simulator,name=iPhone 16 Pro,OS=18.5",
+        destination: "platform=iOS Simulator,name=iPhone 15 Pro",
         only_testing: [test_target],
         clean: true,
         result_bundle: true,
@@ -64,15 +64,15 @@ platform :ios do
     # Ensure you have set up Match repo and environment variables
     # MATCH_PASSWORD, MATCH_GIT_URL, git_private_key (SSH)
     
-    # Use GH_TOKEN for basic auth if available to avoid prompt issues
     match_options = {
         readonly: false,
         clone_branch_directly: false,
         git_branch: "main"
     }
-    
-    if ENV['GH_TOKEN']
-        match_options[:git_basic_authorization] = Base64.strict_encode64(":#{ENV['GH_TOKEN']}")
+
+    # Inject GH_TOKEN into git_url if available for HTTPS auth
+    if ENV['GH_TOKEN'] && ENV['MATCH_GIT_URL']
+        match_options[:git_url] = ENV['MATCH_GIT_URL'].gsub("https://", "https://x-access-token:#{ENV['GH_TOKEN']}@")
     end
     
     # Use keychain from setup_ci if available
@@ -109,6 +109,8 @@ platform :ios do
   lane :build_release do
     sync_certs if is_ci
     
+    # Force manual signing for archive to use the match profiles
+    # note: PROVISIONING_PROFILE_SPECIFIER takes priority
     gym(
       workspace: "Madabank.xcworkspace",
       scheme: "Madabank",
@@ -122,7 +124,7 @@ platform :ios do
       output_directory: "./build",
       output_name: "Madabank.ipa",
       clean: true,
-      xcargs: "-allowProvisioningUpdates"
+      xcargs: "-allowProvisioningUpdates CODE_SIGN_STYLE=Manual PROVISIONING_PROFILE_SPECIFIER='match AppStore online.darisadam.madabank' CODE_SIGN_IDENTITY='Apple Distribution'"
     )
   end
 
