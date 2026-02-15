@@ -37,7 +37,7 @@ platform :ios do
       scan(
         workspace: "Madabank.xcworkspace",
         scheme: scheme,
-        devices: ["iPhone 17 Pro"],
+        devices: ["iPhone 16 Pro"],
         only_testing: [test_target],
         clean: true,
         result_bundle: true,
@@ -114,6 +114,11 @@ platform :ios do
       scheme: "Madabank",
       configuration: "Release",
       export_method: "app-store",
+      export_options: {
+        provisioningProfiles: { 
+          "online.darisadam.madabank" => ENV["sigh_online.darisadam.madabank_appstore_profile-name"]
+        }
+      },
       output_directory: "./build",
       output_name: "Madabank.ipa",
       clean: true,

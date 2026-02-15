@@ -61,6 +61,12 @@ jobs:
           tuist install
           tuist generate
           
+      - name: Configure Git for Push
+        run: |
+          git config --global user.email "bot@madabank.art"
+          git config --global user.name "Madabank Bot"
+          git remote set-url origin https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/${{ github.repository }}.git
+
       - name: Run Fastlane Beta
         run: |
           cd Madabank
