@@ -37,7 +37,7 @@ platform :ios do
       scan(
         workspace: "Madabank.xcworkspace",
         scheme: scheme,
-        devices: ["iPhone 16 Pro"],
+        destination: "platform=iOS Simulator,name=iPhone 15 Pro",
         only_testing: [test_target],
         clean: true,
         result_bundle: true,
@@ -102,7 +102,8 @@ platform :ios do
       configuration: "Debug",
       skip_archive: true,
       skip_codesigning: true,
-      destination: "generic/platform=iOS Simulator"
+      destination: "generic/platform=iOS Simulator",
+      xcargs: "VALIDATE_SIMULATOR_SDKS=NO"
     )
   end
 
@@ -125,7 +126,7 @@ platform :ios do
       output_directory: "./build",
       output_name: "Madabank.ipa",
       clean: true,
-      xcargs: "-allowProvisioningUpdates CODE_SIGN_STYLE=Manual PROVISIONING_PROFILE_SPECIFIER='match AppStore online.darisadam.madabank' CODE_SIGN_IDENTITY='Apple Distribution'"
+      xcargs: "-allowProvisioningUpdates CODE_SIGN_STYLE=Manual PROVISIONING_PROFILE_SPECIFIER='match AppStore online.darisadam.madabank' CODE_SIGN_IDENTITY='Apple Distribution' VALIDATE_SIMULATOR_SDKS=NO ONLY_ACTIVE_ARCH=NO"
     )
   end
 

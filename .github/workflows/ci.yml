@@ -35,7 +35,23 @@ jobs:
         run: brew install swiftlint
       
       - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_16.0.app # Or appropriate version
+        run: |
+          sudo xcode-select -s /Applications/Xcode_16.2.app
+          xcodebuild -version
+          xcrun simctl list runtimes
+      
+      - name: Setup iOS Simulator
+        run: |
+          # Find and boot an available iPhone simulator
+          DEVICE_ID=$(xcrun simctl list devices available iPhone | grep -m 1 "iPhone 15" | grep -o -E "\([0-9A-F-]+\)" | tr -d '()')
+          if [ -z "$DEVICE_ID" ]; then
+            echo "Creating iPhone 15 Pro simulator..."
+            RUNTIME=$(xcrun simctl list runtimes iOS -j | jq -r '.runtimes[-1].identifier')
+            xcrun simctl create "iPhone 15 Pro Test" "com.apple.CoreSimulator.SimDeviceType.iPhone-15-Pro" "$RUNTIME"
+            DEVICE_ID=$(xcrun simctl list devices | grep "iPhone 15 Pro Test" | grep -o -E "\([0-9A-F-]+\)" | tr -d '()')
+          fi
+          echo "SIMULATOR_ID=$DEVICE_ID" >> $GITHUB_ENV
+          xcrun simctl boot "$DEVICE_ID" || true # Or appropriate version
         
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
