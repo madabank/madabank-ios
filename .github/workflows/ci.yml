@@ -22,6 +22,7 @@ jobs:
       MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
       MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       APP_IDENTIFIER: online.darisadam.madabank
       
     steps:
@@ -44,8 +45,6 @@ jobs:
           working-directory: Madabank
 
       - name: Install Tuist
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           curl https://mise.run | sh
           export PATH="$HOME/.local/bin:$PATH"
