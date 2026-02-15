@@ -31,47 +31,118 @@ jobs:
           submodules: recursive
           token: ${{ secrets.GH_TOKEN }}
 
-      - name: Install SwiftLint
-        run: brew install swiftlint
+      # ========== CACHING ==========
+      
+      - name: Cache Homebrew
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/Library/Caches/Homebrew
+            /usr/local/Cellar/swiftlint
+            /usr/local/Cellar/xcbeautify
+          key: ${{ runner.os }}-homebrew-swiftlint-xcbeautify
+          restore-keys: |
+            ${{ runner.os }}-homebrew-
+
+      - name: Cache Ruby Gems
+        uses: actions/cache@v4
+        with:
+          path: Madabank/vendor/bundle
+          key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-gems-
+
+      - name: Cache SPM Dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/Library/Caches/org.swift.swiftpm
+            Madabank/.build
+            Madabank/SourcePackages
+          key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
+          restore-keys: |
+            ${{ runner.os }}-spm-
+
+      - name: Cache Tuist
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.local/share/tuist
+            ~/.tuist
+            Madabank/.tuist-cache
+            Madabank/Tuist/.build
+          key: ${{ runner.os }}-tuist-${{ hashFiles('**/Project.swift', '**/Workspace.swift', '**/Dependencies.swift') }}
+          restore-keys: |
+            ${{ runner.os }}-tuist-
+
+      # Cache DerivedData
+      - name: Cache DerivedData
+        uses: actions/cache@v4
+        with:
+          path: ~/Library/Developer/Xcode/DerivedData
+          key: ${{ runner.os }}-deriveddata-${{ hashFiles('**/Project.swift') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-deriveddata-${{ hashFiles('**/Project.swift') }}-
+            ${{ runner.os }}-deriveddata-
+
+      # ========== SETUP ==========
+
+      - name: Install Homebrew Dependencies
+        run: |
+          brew install swiftlint xcbeautify || true
       
       - name: Select Xcode
         run: |
           sudo xcode-select -s /Applications/Xcode_16.2.app
           xcodebuild -version
-          xcrun simctl list runtimes
-      
-      - name: Setup iOS Simulator
-        run: |
-          # Find and boot an available iPhone simulator
-          DEVICE_ID=$(xcrun simctl list devices available iPhone | grep -m 1 "iPhone 15" | grep -o -E "\([0-9A-F-]+\)" | tr -d '()')
-          if [ -z "$DEVICE_ID" ]; then
-            echo "Creating iPhone 15 Pro simulator..."
-            RUNTIME=$(xcrun simctl list runtimes iOS -j | jq -r '.runtimes[-1].identifier')
-            xcrun simctl create "iPhone 15 Pro Test" "com.apple.CoreSimulator.SimDeviceType.iPhone-15-Pro" "$RUNTIME"
-            DEVICE_ID=$(xcrun simctl list devices | grep "iPhone 15 Pro Test" | grep -o -E "\([0-9A-F-]+\)" | tr -d '()')
-          fi
-          echo "SIMULATOR_ID=$DEVICE_ID" >> $GITHUB_ENV
-          xcrun simctl boot "$DEVICE_ID" || true # Or appropriate version
         
+      - name: Check and Prepare iOS Simulator
+        run: |
+          # Use existing or create iPhone 15 Pro
+          DEVICE_NAME="iPhone 15 Pro"
+          EXISTING_DEVICE=$(xcrun simctl list devices available | grep "$DEVICE_NAME" | head -n 1 | grep -o -E "\([0-9A-F-]+\)" | tr -d '()')
+          
+          if [ -n "$EXISTING_DEVICE" ]; then
+            echo "Using existing device: $EXISTING_DEVICE"
+            DEVICE_ID=$EXISTING_DEVICE
+          else
+            echo "Creating new $DEVICE_NAME simulator"
+            RUNTIME=$(xcrun simctl list runtimes iOS -j | jq -r '.runtimes[-1].identifier')
+            DEVICE_ID=$(xcrun simctl create "$DEVICE_NAME" "com.apple.CoreSimulator.SimDeviceType.iPhone-15-Pro" "$RUNTIME")
+          fi
+          
+          # Boot simulator
+          echo "Booting simulator: $DEVICE_ID"
+          xcrun simctl boot "$DEVICE_ID" 2>/dev/null || echo "Simulator already booted or boot in progress"
+          
+          # Wait for boot (with timeout)
+          echo "Waiting for simulator to be ready..."
+          for i in {1..30}; do
+            if xcrun simctl list devices | grep "$DEVICE_ID" | grep -q "Booted"; then
+              echo "✅ Simulator is ready!"
+              break
+            fi
+            sleep 2
+          done
+          
+          echo "SIMULATOR_DEVICE_NAME=$DEVICE_NAME" >> $GITHUB_ENV
+          echo "SIMULATOR_DEVICE_ID=$DEVICE_ID" >> $GITHUB_ENV
+          
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '4.0.1' # Or from .ruby-version
+          ruby-version: '3.0.1'
           bundler-cache: true
           working-directory: Madabank
 
       - name: Install Tuist
         run: |
-          curl https://mise.run | sh
-          export PATH="$HOME/.local/bin:$PATH"
-          mise use -g tuist
-          # Add shims to PATH for the current step
-          export PATH="$HOME/.local/share/mise/shims:$PATH"
-          # Add shims to GITHUB_PATH for subsequent steps
-          echo "$HOME/.local/share/mise/shims" >> $GITHUB_PATH
+          if ! command -v tuist &> /dev/null; then
+            curl -Ls https://install.tuist.io | bash
+          fi
           tuist version
 
-      - name: Generate Project
+      - name: Generate Project with Tuist
         run: |
           cd Madabank
           tuist install
@@ -81,3 +152,13 @@ jobs:
         run: |
           cd Madabank
           bundle exec fastlane ci
+
+      # ========== ARTIFACTS ==========
+      
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ github.run_number }}
+          path: Madabank/fastlane/test_output/
+          retention-days: 30

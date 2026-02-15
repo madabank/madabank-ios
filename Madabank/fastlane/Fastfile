@@ -34,16 +34,24 @@ platform :ios do
     }
 
     test_targets.each do |scheme, test_target|
+      # Use custom device name from CI if available, otherwise default
+      device_name = ENV['SIMULATOR_DEVICE_NAME'] || "iPhone 15 Pro"
+      destination = "platform=iOS Simulator,name=#{device_name}"
       scan(
         workspace: "Madabank.xcworkspace",
         scheme: scheme,
-        destination: "platform=iOS Simulator,name=iPhone 15 Pro",
+        destination: destination,
         only_testing: [test_target],
         clean: true,
         result_bundle: true,
         code_coverage: true,
         output_directory: "./fastlane/test_output/#{scheme}",
-        xcargs: "-destination-timeout 300 -parallel-testing-enabled NO"
+        xcargs: "-destination-timeout 300 -parallel-testing-enabled NO",
+        # Critical: Skip the xcodebuild -showBuildSettings call that's timing out
+        skip_detect_devices: true,
+        ensure_devices_found: false,
+        reset_simulator: false,
+        force_quit_simulator: false
       )
     end
   end

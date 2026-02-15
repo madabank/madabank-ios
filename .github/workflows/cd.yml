@@ -33,37 +33,76 @@ jobs:
         with:
           submodules: recursive
           token: ${{ secrets.GH_TOKEN }}
+          fetch-depth: 0
+
+      # ========== CACHING ==========
+      
+      - name: Cache Ruby Gems
+        uses: actions/cache@v4
+        with:
+          path: Madabank/vendor/bundle
+          key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-gems-
+
+      - name: Cache SPM Dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/Library/Caches/org.swift.swiftpm
+            Madabank/.build
+            Madabank/SourcePackages
+          key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
+          restore-keys: |
+            ${{ runner.os }}-spm-
+
+      - name: Cache Tuist
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.local/share/tuist
+            ~/.tuist
+            Madabank/.tuist-cache
+            Madabank/Tuist/.build
+          key: ${{ runner.os }}-tuist-${{ hashFiles('**/Project.swift', '**/Workspace.swift', '**/Dependencies.swift') }}
+          restore-keys: |
+            ${{ runner.os }}-tuist-
+
+      - name: Cache Match Certificates
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/Library/MobileDevice/Provisioning Profiles
+          key: ${{ runner.os }}-match-${{ secrets.MATCH_PASSWORD }}-${{ hashFiles('**/Matchfile') }}
+          restore-keys: |
+            ${{ runner.os }}-match-
+
+      # ========== SETUP ==========
       
       - name: Select Xcode
         run: |
           sudo xcode-select -s /Applications/Xcode_16.2.app
           xcodebuild -version
-
-      - name: Install iOS Simulator Runtime (if needed)
-        run: |
-          # Install the latest iOS runtime to match SDK
-          xcodebuild -downloadAllPlatforms || true
-          xcrun simctl list runtimes
-        
+          
+      # NO SIMULATOR SETUP NEEDED FOR RELEASE BUILDS!
+          
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '4.0.1'
+          ruby-version: '3.0.1'
           bundler-cache: true
           working-directory: Madabank
 
       - name: Install Tuist
         run: |
-          curl https://mise.run | sh
-          export PATH="$HOME/.local/bin:$PATH"
-          mise use -g tuist
-          # Add shims to PATH for the current step
-          export PATH="$HOME/.local/share/mise/shims:$PATH"
-          # Add shims to GITHUB_PATH for subsequent steps
-          echo "$HOME/.local/share/mise/shims" >> $GITHUB_PATH
-          tuist version
+          if ! command -v tuist &> /dev/null; then
+            curl -Ls https://install.tuist.io | bash
+          else
+            echo "Tuist already installed"
+            tuist version
+          fi
 
-      - name: Generate Project
+      - name: Generate Project with Tuist
         run: |
           cd Madabank
           tuist install
