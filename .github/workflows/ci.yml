@@ -22,12 +22,16 @@ jobs:
       MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
       MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      APP_IDENTIFIER: online.darisadam.madabank
       
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
           token: ${{ secrets.GH_TOKEN }}
+
+      - name: Install SwiftLint
+        run: brew install swiftlint
       
       - name: Select Xcode
         run: sudo xcode-select -s /Applications/Xcode_16.0.app # Or appropriate version

@@ -24,6 +24,8 @@ jobs:
       GH_TOKEN: ${{ secrets.GH_TOKEN }} # For Match git access
       CI_PAT: ${{ secrets.CI_PAT }}
       GIT_AUTHORIZATION: ${{ secrets.GIT_AUTHORIZATION }}
+      APP_IDENTIFIER: online.darisadam.madabank
+      TEAM_ID: Q99UJS4WY6
       
     steps:
       - uses: actions/checkout@v4
