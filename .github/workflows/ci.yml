@@ -43,6 +43,9 @@ jobs:
           curl https://mise.run | sh
           export PATH="$HOME/.local/bin:$PATH"
           mise use -g tuist
+          # Add shims to PATH for the current step
+          export PATH="$HOME/.local/share/mise/shims:$PATH"
+          # Add shims to GITHUB_PATH for subsequent steps
           echo "$HOME/.local/share/mise/shims" >> $GITHUB_PATH
           tuist --version
 
