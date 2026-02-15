@@ -44,13 +44,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-homebrew-
 
-      - name: Cache Ruby Gems
-        uses: actions/cache@v4
-        with:
-          path: Madabank/vendor/bundle
-          key: ${{ runner.os }}-ruby-3.3-gems-${{ hashFiles('**/Gemfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-ruby-3.3-gems-
+
 
       - name: Cache SPM Dependencies
         uses: actions/cache@v4
@@ -128,12 +122,26 @@ jobs:
           echo "SIMULATOR_DEVICE_NAME=$DEVICE_NAME" >> $GITHUB_ENV
           echo "SIMULATOR_DEVICE_ID=$DEVICE_ID" >> $GITHUB_ENV
           
-      - name: Setup Ruby
+      - name: Setup Ruby (without automatic bundler-cache)
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.3'
-          bundler-cache: true
+          bundler-cache: false  # Disable to handle manually
           working-directory: Madabank
+      
+      - name: Install Bundler and Gems
+        run: |
+          cd Madabank
+          
+          # Install latest bundler
+          gem install bundler
+          
+          # Configure bundle path
+          bundle config set --local path 'vendor/bundle'
+          bundle config set --local deployment 'false'
+          
+          # Clean install
+          bundle install --jobs 4 --retry 3
 
       - name: Install Tuist
         run: |
@@ -162,3 +170,13 @@ jobs:
           name: test-results-${{ github.run_number }}
           path: Madabank/fastlane/test_output/
           retention-days: 30
+          if-no-files-found: warn
+
+      - name: Upload Coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ github.run_number }}
+          path: Madabank/fastlane/test_output/**/*.xcresult
+          retention-days: 30
+          if-no-files-found: warn
