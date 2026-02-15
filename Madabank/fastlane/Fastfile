@@ -34,18 +34,16 @@ platform :ios do
     }
 
     test_targets.each do |scheme, test_target|
-    test_targets.each do |scheme, test_target|
       scan(
         workspace: "Madabank.xcworkspace",
         scheme: scheme,
-        destination: "platform=iOS Simulator,name=iPhone 16 Pro",
+        destination: "platform=iOS Simulator,name=iPhone 16 Pro,OS=18.5",
         only_testing: [test_target],
         clean: true,
         result_bundle: true,
         code_coverage: true,
         output_directory: "./fastlane/test_output/#{scheme}"
       )
-    end
     end
   end
 
