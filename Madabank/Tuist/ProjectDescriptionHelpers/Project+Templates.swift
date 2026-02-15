@@ -17,7 +17,13 @@ public extension Project {
                 automaticSchemesOptions: .disabled,
                 textSettings: .textSettings(usesTabs: false, indentWidth: 4, tabWidth: 4)
             ),
-            settings: .settings(base: ["SWIFT_STRICT_CONCURRENCY": "complete"]),
+            settings: .settings(base: [
+                "SWIFT_STRICT_CONCURRENCY": "complete",
+                "CURRENT_PROJECT_VERSION": "1",
+                "MARKETING_VERSION": "1.0",
+                "VERSIONING_SYSTEM": "apple-generic",
+                "DEVELOPMENT_TEAM": "Q99UJS4WY6"
+            ]),
             targets: [
                 .target(
                     name: name,
@@ -43,7 +49,10 @@ public extension Project {
                         "CFBundleDisplayName": "Madabank",
                         "NSAppTransportSecurity": [
                             "NSAllowsArbitraryLoads": true
-                        ]
+                        ],
+                        "NSCameraUsageDescription": "Madabank needs camera access to scan QR codes for payments.",
+                        "NSFaceIDUsageDescription": "Madabank uses FaceID to securely log you in.",
+                        "ITSAppUsesNonExemptEncryption": false
                     ]),
                     sources: ["Madabank/Sources/**"],
                     resources: ["Madabank/Resources/**"],

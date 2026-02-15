@@ -2,7 +2,7 @@ import UIKit
 import Core
 import Auth
 import Home
-import Accounts
+import MadabankAccounts
 import Cards
 import Transactions
 import Domain
@@ -42,7 +42,9 @@ class AppCoordinator: AuthCoordinatorDelegate, HomeCoordinatorDelegate {
             self.checkAuthStateAndRedirect()
             
             // If error, show blocking overlay immediately
-            if status != .healthy {
+            // SKIP if UI Testing (to avoid blocking simulator)
+            let isUITesting = ProcessInfo.processInfo.arguments.contains("--uitesting")
+            if status != .healthy && !isUITesting {
                 self.showBlockingError(status: status)
             }
         }
@@ -159,5 +161,29 @@ class AppCoordinator: AuthCoordinatorDelegate, HomeCoordinatorDelegate {
     
     func homeCoordinatorDidRequestTopUp(_ coordinator: HomeCoordinator) {
 
+    }
+    
+    func homeCoordinatorDidRequestScan(_ coordinator: HomeCoordinator) {
+        // Handle scan navigation
+        // For now, assume it's like a payment flow or QR scanner
+        let scanner = AppDIContainer.shared.makeQRScannerViewController(delegate: self)
+        scanner.hidesBottomBarWhenPushed = true
+        coordinator.navigationController.pushViewController(scanner, animated: true)
+    }
+}
+
+// MARK: - QRScannerDelegate
+extension AppCoordinator: QRScannerViewControllerDelegate {
+    func qrScannerDidScan(code: String) {
+        // Pop scanner
+        if let homeCoord = homeCoordinator {
+             homeCoord.navigationController.popViewController(animated: true)
+             // Handle payment flow
+             let paymentVC = AppDIContainer.shared.makeQRPaymentViewController(recipientName: "Unknown", actions: QRPaymentViewModelActions { [weak homeCoord] in
+                 homeCoord?.navigationController.popToRootViewController(animated: true)
+             })
+             paymentVC.hidesBottomBarWhenPushed = true
+             homeCoord.navigationController.pushViewController(paymentVC, animated: true)
+        }
     }
 }

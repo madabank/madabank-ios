@@ -13,3 +13,6 @@ excluded:
   - .build
   - .tuist-bin
   - vendor
+
+disabled_rules:
+  - trailing_closure

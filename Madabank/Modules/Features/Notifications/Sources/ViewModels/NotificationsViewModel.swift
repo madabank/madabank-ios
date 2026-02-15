@@ -45,11 +45,11 @@ public class NotificationsViewModel {
     
     private func setupBindings() {
         viewDidLoad
-            .subscribe { [weak self] in self?.fetchNotifications() }
+            .subscribe(onNext: { [weak self] in self?.fetchNotifications() })
             .disposed(by: disposeBag)
             
         refresh
-            .subscribe { [weak self] in self?.fetchNotifications() }
+            .subscribe(onNext: { [weak self] in self?.fetchNotifications() })
             .disposed(by: disposeBag)
     }
     

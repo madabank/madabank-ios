@@ -4,7 +4,7 @@ import Data
 import Networking
 import Auth
 import Home
-import Accounts
+import MadabankAccounts
 import Cards
 import Transactions
 import Profile

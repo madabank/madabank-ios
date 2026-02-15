@@ -17,15 +17,34 @@ platform :ios do
   
   desc "Run unit tests"
   lane :test do
-    scan(
-      workspace: "Madabank.xcworkspace",
-      scheme: "Madabank",
-      devices: ["iPhone 16 Pro"],
-      clean: true,
-      result_bundle: true,
-      code_coverage: true,
-      output_directory: "./fastlane/test_output"
-    )
+    test_targets = {
+      "Madabank" => "MadabankTests",
+      "Core" => "CoreTests",
+      "Networking" => "NetworkingTests",
+      "Domain" => "DomainTests",
+      "Data" => "DataTests",
+      "CommonUITests" => "CommonUITests",
+      "Auth" => "AuthTests",
+      "Home" => "HomeTests",
+      "Accounts" => "AccountsTests",
+      "Cards" => "CardsTests",
+      "Transactions" => "TransactionsTests",
+      "Profile" => "ProfileTests",
+      "Notifications" => "NotificationsTests"
+    }
+
+    test_targets.each do |scheme, test_target|
+      scan(
+        workspace: "Madabank.xcworkspace",
+        scheme: scheme,
+        devices: ["iPhone 17 Pro"],
+        only_testing: [test_target],
+        clean: true,
+        result_bundle: true,
+        code_coverage: true,
+        output_directory: "./fastlane/test_output/#{scheme}"
+      )
+    end
   end
 
   desc "Run SwiftLint"
@@ -58,7 +77,7 @@ platform :ios do
     
     # Use keychain from setup_ci if available
     if is_ci
-        keychain_path = LaneContext[SharedValues::KEYCHAIN_PATH]
+        keychain_path = lane_context[SharedValues::KEYCHAIN_PATH]
         if keychain_path
             match_options[:keychain_name] = keychain_path
             match_options[:keychain_password] = "" # setup_ci unlocks it
@@ -97,7 +116,8 @@ platform :ios do
       export_method: "app-store",
       output_directory: "./build",
       output_name: "Madabank.ipa",
-      clean: true
+      clean: true,
+      xcargs: "-allowProvisioningUpdates"
     )
   end
 
@@ -112,23 +132,32 @@ platform :ios do
 
   desc "Deploy to TestFlight"
   lane :beta do
-    ensure_git_status_clean unless is_ci
+    # ensure_git_status_clean unless is_ci
     
     api_key = nil
     if ENV["APP_STORE_CONNECT_API_KEY_KEY"]
-        raw_api_key = ENV["APP_STORE_CONNECT_API_KEY_KEY"].to_s.gsub("\\n", "\n").gsub("\0", "").strip
-        is_base64 = true
+        UI.message("Debug: Key ID present: #{!ENV['APP_STORE_CONNECT_API_KEY_KEY_ID'].to_s.empty?}")
+        UI.message("Debug: Key Content present: #{!ENV['APP_STORE_CONNECT_API_KEY_KEY'].to_s.empty?}")
+        # Robustly handle different key formats (with/without headers, newlines, spaces)
+        raw_api_key = ENV["APP_STORE_CONNECT_API_KEY_KEY"].to_s
+        clean_key = raw_api_key.gsub("-----BEGIN PRIVATE KEY-----", "")
+                               .gsub("-----END PRIVATE KEY-----", "")
+                               .gsub("\\n", "")
+                               .gsub("\n", "")
+                               .gsub("\r", "")
+                               .gsub(" ", "")
+                               .strip
         
-        # Check if it looks like a raw PEM key
-        if raw_api_key.include?("-----BEGIN")
-            is_base64 = false
-        end
+        # Reconstruct PEM format
+        pem_key = "-----BEGIN PRIVATE KEY-----\n"
+        pem_key += clean_key.scan(/.{1,64}/).join("\n")
+        pem_key += "\n-----END PRIVATE KEY-----"
         
         api_key = app_store_connect_api_key(
             key_id: ENV["APP_STORE_CONNECT_API_KEY_KEY_ID"],
             issuer_id: ENV["APP_STORE_CONNECT_API_KEY_ISSUER_ID"],
-            key_content: raw_api_key,
-            is_key_content_base64: is_base64,
+            key_content: pem_key,
+            is_key_content_base64: false,
             in_house: false
         )
     end

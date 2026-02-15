@@ -1,76 +1,53 @@
-name: iOS CD
+name: Madabank CD
 
 on:
-  pull_request:
-    branches:
-      - develop
-  # pull_request:
-  #   branches:
-  #     - main
+  push:
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
-  deploy:
-    name: Deploy to TestFlight
+  deploy_beta:
     runs-on: macos-15
-    if: github.event.pull_request.head.repo.full_name == github.repository
     
+    permissions:
+      contents: write
+
+    env:
+      APPLE_ID: ${{ secrets.APPLE_ID }}
+      APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
+      APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
+      APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
+      MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+      MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+      GH_TOKEN: ${{ secrets.GH_TOKEN }} # For Match git access
+      CI_PAT: ${{ secrets.CI_PAT }}
+      GIT_AUTHORIZATION: ${{ secrets.GIT_AUTHORIZATION }}
+      
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          fetch-depth: 0
-          token: ${{ secrets.GIT_AUTHORIZATION || secrets.GITHUB_TOKEN }}
-          
-      - name: Setup Xcode
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: latest-stable
-          
+      - uses: actions/checkout@v4
+      
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_16.0.app
+        
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.3'
-          bundler-cache: false # Disable automatic cache to prevent conflicts
-          
-      - name: Install Mise
-        uses: jdx/mise-action@v2
-        with:
-          install: false
+          ruby-version: '4.0.1'
+          bundler-cache: true
+          working-directory: Madabank
 
       - name: Install Tuist
-        run: mise install tuist
-
-      - name: Install SwiftLint
-        run: brew install swiftlint
-
-      - name: Install dependencies
-        working-directory: Madabank
         run: |
-          # Clean up any existing artifacts to ensure fresh install
-          rm -rf vendor/bundle Gemfile.lock
-          
-          # Install dependencies
-          bundle install --jobs 4 --retry 3
+          curl -Ls https://install.tuist.io | bash
+          tuist --version
+
+      - name: Generate Project
+        run: |
+          cd Madabank
           tuist install
+          tuist generate
           
-      - name: Generate project
-        working-directory: Madabank
-        run: tuist generate
-        
       - name: Run Fastlane Beta
-        working-directory: Madabank
-        env:
-          APP_IDENTIFIER: 'online.darisadam.madabank'
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
-          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
-          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
-          FASTLANE_PASSWORD: ${{ secrets.FASTLANE_PASSWORD }}
-          APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
-          APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
-          APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
-          GIT_AUTHORIZATION: ${{ secrets.GIT_AUTHORIZATION }}
-          GH_TOKEN: ${{ secrets.GIT_AUTHORIZATION }}
-        run: bundle exec fastlane beta
+        run: |
+          cd Madabank
+          bundle exec fastlane beta

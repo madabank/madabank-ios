@@ -18,6 +18,7 @@ let project = Project.app(
         .external(name: "RxSwift"),
         .external(name: "RxCocoa"),
         .external(name: "netfox"),
-        .external(name: "IQKeyboardManagerSwift")
+        .external(name: "IQKeyboardManagerSwift"),
+        .external(name: "IOSSecuritySuite")
     ]
 )
