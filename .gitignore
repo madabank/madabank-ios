@@ -3,6 +3,28 @@
 .AppleDouble
 .LSOverride
 
+# Icon must end with two \r
+Icon
+
+# Thumbnails
+._*
+
+# Files that might appear in the root of a volume
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
 # Xcode
 build/
 *.derived
@@ -32,6 +54,11 @@ Tuist/Graph/
 *.xcworkspace
 *.xcodeproj
 
+# Madabank specific
+Madabank/vendor/
+Madabank/.bundle/
+
+
 # Swift Package Manager
 .build/
 .swiftpm/
@@ -42,6 +69,7 @@ fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots
 fastlane/test_output
+fastlane/README.md
 vendor/bundle
 
 # CocoaPods
@@ -54,6 +82,9 @@ Carthage/Build/
 # Test outputs
 *.xcresult
 coverage/
+*.gcno
+*.gcda
+*.profraw
 
 # IDE
 .idea/
@@ -64,6 +95,7 @@ coverage/
 # Environment & Secrets
 .env
 .env.*
+!.env.default
 *.pem
 *.p12
 *.mobileprovision
@@ -71,7 +103,6 @@ coverage/
 # Other
 .apple/
 Thumbs.db
-
 
 # Logs
 *.log

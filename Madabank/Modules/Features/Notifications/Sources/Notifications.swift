@@ -5,6 +5,7 @@ public enum Notifications {
     public static let version = "1.0.0"
 }
 
+@MainActor
 public protocol NotificationsFactory {
     func makeNotificationsViewController() -> UIViewController
 }

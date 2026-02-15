@@ -1,35 +1,34 @@
 import XCTest
 
+@MainActor
 final class HomeUITests: XCTestCase {
 
-    override func setUpWithError() throws {
-        continueAfterFailure = false
-        let app = XCUIApplication()
-        app.launchArguments += ["-uiTesting"]
-        // Assuming we have a way to bypass login or we login first
-        // Ideally we mock the session to start at Home
-    }
 
-    func testDashboardElementsExist() throws {
+
+    func testDashboardElementsExist() async throws {
         let app = XCUIApplication()
         app.launch()
         
         // If we need to login first
-        if app.buttons["Sign In"].exists {
-            let emailField = app.textFields["email_input"]
-            let passwordField = app.secureTextFields["password_input"]
+        if app.buttons["login_sign_in_button"].exists || app.buttons["Sign In"].exists {
+            let emailField = app.textFields["login_email_field"]
+            let passwordField = app.secureTextFields["login_password_field"]
             
             if emailField.exists {
                 emailField.tap()
-                emailField.typeText("test@example.com")
+                emailField.typeText("dev@madabank.art")
             }
             
             if passwordField.exists {
                 passwordField.tap()
-                passwordField.typeText("Password123!")
+                passwordField.typeText("password123")
             }
             
-            app.buttons["login_button"].tap()
+            if app.buttons["login_sign_in_button"].exists {
+                app.buttons["login_sign_in_button"].tap()
+            } else {
+                app.buttons["Sign In"].tap()
+            }
         }
         
         // Wait for Home

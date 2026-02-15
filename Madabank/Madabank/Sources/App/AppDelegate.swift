@@ -1,6 +1,7 @@
 import UIKit
 import netfox
 import IQKeyboardManagerSwift
+import Core
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -9,13 +10,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
-        // Enable IQKeyboardManager
-        IQKeyboardManager.shared.enable = true
-        IQKeyboardManager.shared.shouldResignOnTouchOutside = true
+        if CommandLine.arguments.contains("--uitesting") {
+            if CommandLine.arguments.contains("-reset") {
+                TokenManager.shared.clearSession()
+            }
+            IQKeyboardManager.shared.enable = false
+        } else {
+            // Enable IQKeyboardManager
+            IQKeyboardManager.shared.enable = true
+            IQKeyboardManager.shared.shouldResignOnTouchOutside = true
+            SecurityManager.shared.performSecurityChecks()
+        }
         
         #if DEBUG
         NFX.sharedInstance().start()
         #endif
+        
         return true
     }
 

@@ -1,33 +1,33 @@
 [submodule "Madabank/Modules/Shared/Core"]
 	path = Madabank/Modules/Shared/Core
-	url = https://github.com/madabank/madabank-core.git
+	url = ../madabank-core.git
 [submodule "Madabank/Modules/Shared/Networking"]
 	path = Madabank/Modules/Shared/Networking
-	url = https://github.com/madabank/madabank-networking.git
+	url = ../madabank-networking.git
 [submodule "Madabank/Modules/Shared/Domain"]
 	path = Madabank/Modules/Shared/Domain
-	url = https://github.com/madabank/madabank-domain.git
+	url = ../madabank-domain.git
 [submodule "Madabank/Modules/Shared/Data"]
 	path = Madabank/Modules/Shared/Data
-	url = https://github.com/madabank/madabank-data.git
+	url = ../madabank-data.git
 [submodule "Madabank/Modules/Shared/CommonUI"]
 	path = Madabank/Modules/Shared/CommonUI
-	url = https://github.com/madabank/madabank-common-ui.git
+	url = ../madabank-common-ui.git
 [submodule "Madabank/Modules/Features/Auth"]
 	path = Madabank/Modules/Features/Auth
-	url = https://github.com/madabank/madabank-auth.git
+	url = ../madabank-auth.git
 [submodule "Madabank/Modules/Features/Home"]
 	path = Madabank/Modules/Features/Home
-	url = https://github.com/madabank/madabank-home.git
+	url = ../madabank-home.git
 [submodule "Madabank/Modules/Features/Accounts"]
 	path = Madabank/Modules/Features/Accounts
-	url = https://github.com/madabank/madabank-accounts.git
+	url = ../madabank-accounts.git
 [submodule "Madabank/Modules/Features/Cards"]
 	path = Madabank/Modules/Features/Cards
-	url = https://github.com/madabank/madabank-cards.git
+	url = ../madabank-cards.git
 [submodule "Madabank/Modules/Features/Transactions"]
 	path = Madabank/Modules/Features/Transactions
-	url = https://github.com/madabank/madabank-transactions.git
+	url = ../madabank-transactions.git
 [submodule "Madabank/Modules/Features/Profile"]
 	path = Madabank/Modules/Features/Profile
-	url = https://github.com/madabank/madabank-profile.git
+	url = ../madabank-profile.git

@@ -1,49 +1,42 @@
-name: Madabank CI
+name: Madabank CD
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main ]
   pull_request:
     branches: [ develop ]
   workflow_dispatch:
 
 jobs:
-  build_and_test:
+  deploy_beta:
     runs-on: macos-15
     
+    permissions:
+      contents: write
+
     env:
-      XC_VERSION: 16.0 # Adjust based on project requirements
-      
-      # Secrets for potential Match/Fastlane usage
       APPLE_ID: ${{ secrets.APPLE_ID }}
       APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
       APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
       APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
       MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
       MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
-      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      GH_TOKEN: ${{ secrets.GH_TOKEN }} # For Match git access
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      CI_PAT: ${{ secrets.CI_PAT }}
+      GIT_AUTHORIZATION: ${{ secrets.GIT_AUTHORIZATION }}
       APP_IDENTIFIER: online.darisadam.madabank
+      TEAM_ID: Q99UJS4WY6
       
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
           token: ${{ secrets.GH_TOKEN }}
+          fetch-depth: 0
 
       # ========== CACHING ==========
       
-      - name: Cache Homebrew
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/Library/Caches/Homebrew
-            /usr/local/Cellar/swiftlint
-            /usr/local/Cellar/xcbeautify
-          key: ${{ runner.os }}-homebrew-swiftlint-xcbeautify
-          restore-keys: |
-            ${{ runner.os }}-homebrew-
-
 
 
       - name: Cache SPM Dependencies
@@ -69,58 +62,23 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-tuist-
 
-      # Cache DerivedData
-      - name: Cache DerivedData
+      - name: Cache Match Certificates
         uses: actions/cache@v4
         with:
-          path: ~/Library/Developer/Xcode/DerivedData
-          key: ${{ runner.os }}-deriveddata-${{ hashFiles('**/Project.swift') }}-${{ github.sha }}
+          path: |
+            ~/Library/MobileDevice/Provisioning Profiles
+          key: ${{ runner.os }}-match-${{ secrets.MATCH_PASSWORD }}-${{ hashFiles('**/Matchfile') }}
           restore-keys: |
-            ${{ runner.os }}-deriveddata-${{ hashFiles('**/Project.swift') }}-
-            ${{ runner.os }}-deriveddata-
+            ${{ runner.os }}-match-
 
       # ========== SETUP ==========
-
-      - name: Install Homebrew Dependencies
-        run: |
-          brew install swiftlint xcbeautify || true
       
       - name: Select Xcode
         run: |
           sudo xcode-select -s /Applications/Xcode_16.2.app
           xcodebuild -version
-        
-      - name: Check and Prepare iOS Simulator
-        run: |
-          # Use existing or create iPhone 15 Pro
-          DEVICE_NAME="iPhone 15 Pro"
-          EXISTING_DEVICE=$(xcrun simctl list devices available | grep "$DEVICE_NAME" | head -n 1 | grep -o -E "\([0-9A-F-]+\)" | tr -d '()')
           
-          if [ -n "$EXISTING_DEVICE" ]; then
-            echo "Using existing device: $EXISTING_DEVICE"
-            DEVICE_ID=$EXISTING_DEVICE
-          else
-            echo "Creating new $DEVICE_NAME simulator"
-            RUNTIME=$(xcrun simctl list runtimes iOS -j | jq -r '.runtimes[-1].identifier')
-            DEVICE_ID=$(xcrun simctl create "$DEVICE_NAME" "com.apple.CoreSimulator.SimDeviceType.iPhone-15-Pro" "$RUNTIME")
-          fi
-          
-          # Boot simulator
-          echo "Booting simulator: $DEVICE_ID"
-          xcrun simctl boot "$DEVICE_ID" 2>/dev/null || echo "Simulator already booted or boot in progress"
-          
-          # Wait for boot (with timeout)
-          echo "Waiting for simulator to be ready..."
-          for i in {1..30}; do
-            if xcrun simctl list devices | grep "$DEVICE_ID" | grep -q "Booted"; then
-              echo "✅ Simulator is ready!"
-              break
-            fi
-            sleep 2
-          done
-          
-          echo "SIMULATOR_DEVICE_NAME=$DEVICE_NAME" >> $GITHUB_ENV
-          echo "SIMULATOR_DEVICE_ID=$DEVICE_ID" >> $GITHUB_ENV
+      # NO SIMULATOR SETUP NEEDED FOR RELEASE BUILDS!
           
       - name: Setup Ruby (without automatic bundler-cache)
         uses: ruby/setup-ruby@v1
@@ -156,27 +114,37 @@ jobs:
           tuist install
           tuist generate
           
-      - name: Run Fastlane CI
+      - name: Configure Git for Push
+        run: |
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git remote set-url origin https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/${{ github.repository }}.git
+
+      - name: Run Fastlane Beta
         run: |
           cd Madabank
-          bundle exec fastlane ci
+          bundle exec fastlane beta
 
       # ========== ARTIFACTS ==========
       
-      - name: Upload Test Results
+      - name: Upload Build Artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results-${{ github.run_number }}
-          path: Madabank/fastlane/test_output/
-          retention-days: 30
+          name: ios-build-artifacts-${{ github.run_number }}
+          path: |
+            Madabank/build/*.ipa
+            Madabank/build/*.dSYM.zip
+          retention-days: 90
           if-no-files-found: warn
 
-      - name: Upload Coverage
-        if: always()
+      - name: Upload Logs on Failure
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-${{ github.run_number }}
-          path: Madabank/fastlane/test_output/**/*.xcresult
-          retention-days: 30
+          name: fastlane-logs-${{ github.run_number }}
+          path: |
+            ~/Library/Logs/gym
+            ~/Library/Logs/scan
+          retention-days: 14
           if-no-files-found: warn

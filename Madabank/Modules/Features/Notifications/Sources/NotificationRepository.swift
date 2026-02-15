@@ -12,7 +12,7 @@ public class NotificationRepository: NotificationRepositoryProtocol {
     }
     
     public func getNotifications() async throws -> [Domain.Notification] {
-        return []
+        []
     }
     
     public func markAsRead(id: String) async throws {
