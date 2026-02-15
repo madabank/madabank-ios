@@ -47,7 +47,7 @@ jobs:
           export PATH="$HOME/.local/share/mise/shims:$PATH"
           # Add shims to GITHUB_PATH for subsequent steps
           echo "$HOME/.local/share/mise/shims" >> $GITHUB_PATH
-          tuist --version
+          tuist version
 
       - name: Generate Project
         run: |
