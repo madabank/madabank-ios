@@ -39,6 +39,8 @@ jobs:
           working-directory: Madabank
 
       - name: Install Tuist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           curl https://mise.run | sh
           export PATH="$HOME/.local/bin:$PATH"
